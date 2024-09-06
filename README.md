@@ -18,11 +18,11 @@ Key benefits of using blueprints:
 
 Below is an explaination of this folder structure:
 
-**blueprints\static** - This is where css and js will go.
-**blueprints\templates** - This is where html will go.
-**blueprints\init.py** - This is where connections will go e.g. APIs, database connections
-**blueprints\models.py** - This is where objects like forms, classes will go.
-**blueprints\routes.py** - This is where will will implement most of the logic there.
+- **blueprints/static**: This is where CSS and JS will go.
+- **blueprints/templates**: This is where HTML will go.
+- **blueprints/__init__.py**: This is where connections will go (e.g., APIs, database connections).
+- **blueprints/models.py**: This is where objects like forms and classes will go.
+- **blueprints/routes.py**: This is where we will implement most of the logic.
 
 ## Getting Started with Blueprints
 
