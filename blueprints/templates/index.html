@@ -10,47 +10,51 @@
 
     <div class="chat-container">
         <h1>Placeholder ChatBot</h1>
-        <div class="chat-messages" id="chat-messages"></div>
-        <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Type your message here...">
-            <button onclick="sendMessage()">Send</button>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be displayed here -->
         </div>
+
+        <div class="chat-input">
+            <!-- Create a form to submit the user's message -->
+            <form id="chat-form" onsubmit="sendMessage()" autocomplete="off">
+                <input type="text" id="user-input" name="user_input" placeholder="Type your message here...">
+                <button type="submit">Send</button>
+            </form>
+        </div>
+
     </div>
 
     <script>
         function sendMessage() {
-            const input = document.getElementById('user-input');
-            const message = input.value.trim();
-            if (message) {
-                appendMessage(message, true);
-                input.value = '';
-                // Here you would typically send the message to your chatbot backend
-                // and receive a response. For this example, we'll just echo the message.
-                setTimeout(() => {
-                    appendMessage('I received your message: "' + message + '"', false);
-                }, 1000);
-            }
+            event.preventDefault();  // Prevents form from refreshing the page
+            // Get the value from the input field
+            var userInput = document.getElementById("user-input").value;
+
+            // Make an AJAX request to send the data to Flask
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/submit", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            // Define what happens on successful data submission
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // Get the response from Flask and display it
+                    var response = JSON.parse(xhr.responseText);
+                    var user_input = response.user_input
+                    var assistant_response = response.assistant_response
+
+                    // Display the variables in the chat interface
+                    document.getElementById("chat-messages").innerHTML += "<p>" + user_input + "</p>";
+                    document.getElementById("chat-messages").innerHTML += "<p>" + assistant_response + "</p>";
+
+                    // Clear the input field
+                document.getElementById("user-input").value = "";
+                }
+            };
+
+            // Send the form data to Flask
+            xhr.send("user_input=" + encodeURIComponent(userInput));
         }
-
-        function appendMessage(message, isUser) {
-            const chatMessages = document.getElementById('chat-messages');
-            const messageContainer = document.createElement('div');
-            messageContainer.className = 'message-container' + (isUser ? ' user' : '');
-
-            const messageElement = document.createElement('div');
-            messageElement.className = 'message';
-            messageElement.textContent = isUser ? 'You: ' + message : 'Chatbot: ' + message;
-
-            messageContainer.appendChild(messageElement);
-            chatMessages.appendChild(messageContainer);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        document.getElementById('user-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
     </script>
 </body>
 </html>
