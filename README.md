@@ -1,6 +1,5 @@
 # Welcome to Group 4's Chatbot!
 
-
 This project is designed to follow the Flask framework's **blueprint** structure, allowing for better organization, modularity, and collaborative development. While this README is still a work in progress, we will continue to update it as the project evolves.
 
 The goal is to make collaboration seamless by adhering to Flask's best practices. At first, the folder structure may seem confusing, but as we proceed, you should find this structure beneficial as compared to lumping all our code together

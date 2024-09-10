@@ -3,58 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full-screen Chatbot Interface</title>
+    <title>Home</title>
     <link rel="stylesheet" href="../static/css/index.css">
 </head>
 <body>
+    <h1>Home page</h1>
 
-    <div class="chat-container">
-        <h1>Placeholder ChatBot</h1>
-        <div class="chat-messages" id="chat-messages">
-            <!-- Messages will be displayed here -->
-        </div>
-
-        <div class="chat-input">
-            <!-- Create a form to submit the user's message -->
-            <form id="chat-form" onsubmit="sendMessage()" autocomplete="off">
-                <input type="text" id="user-input" name="user_input" placeholder="Type your message here...">
-                <button type="submit">Send</button>
-            </form>
-        </div>
-
-    </div>
-
-    <script>
-        function sendMessage() {
-            event.preventDefault();  // Prevents form from refreshing the page
-            // Get the value from the input field
-            var userInput = document.getElementById("user-input").value;
-
-            // Make an AJAX request to send the data to Flask
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/submit", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            // Define what happens on successful data submission
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    // Get the response from Flask and display it
-                    var response = JSON.parse(xhr.responseText);
-                    var user_input = response.user_input
-                    var assistant_response = response.assistant_response
-
-                    // Display the variables in the chat interface
-                    document.getElementById("chat-messages").innerHTML += "<p>" + user_input + "</p>";
-                    document.getElementById("chat-messages").innerHTML += "<p>" + assistant_response + "</p>";
-
-                    // Clear the input field
-                document.getElementById("user-input").value = "";
-                }
-            };
-
-            // Send the form data to Flask
-            xhr.send("user_input=" + encodeURIComponent(userInput));
-        }
-    </script>
+    <script></script>
 </body>
 </html>

@@ -3,44 +3,32 @@ import sys
 from secret_key import client
 
 home_blueprint = Blueprint('home', __name__)
-
-
-def chat_with_gpt(conversation_history):
-    chat_completion = client.chat.completions.create(
-        messages=conversation_history,
-        model="gpt-4o-mini",
-    )
-
-    return chat_completion
-
-conversation_history = []
+login_blueprint = Blueprint('login', __name__)
+register_user_blueprint = Blueprint('register', __name__)
+profile_page_blueprint = Blueprint('profile', __name__)
+error_blueprint = Blueprint('error', __name__)
+error500_blueprint = Blueprint('error500', __name__)
 
 @home_blueprint.route('/')
 def index():
-    return render_template('index.html')  # Your HTML file is named 'chat.html'
+    return render_template('index.html')
 
+@login_blueprint.route('/login')
+def index():
+    return render_template('login.html')
 
-@home_blueprint.route('/submit', methods=['POST'])
-def submit():
-    user_input = request.form.get('user_input')
-    conversation_history.append({
-        "role": "user",
-        "content": user_input,
-    })
-    # Get GPT's response based on the conversation history
-    response = chat_with_gpt(conversation_history)
+@register_user_blueprint.route('/register')
+def index():
+    return render_template('register.html')
 
-    # Get GPT's response message and add it to the conversation history
-    assistant_response = response.choices[0].message.content.strip()
+@profile_page_blueprint.route('/profile')
+def index():
+    return render_template('profile.html')
 
-    conversation_history.append({
-        "role": "assistant",
-        "content": assistant_response,
-    })
+@error_blueprint.app_errorhandler(404)
+def page_not_found(e): # Return error 404
+    return render_template('404.html'), 404
 
-    # Process the input (e.g., print to terminal)
-    print(f"User Message: {user_input},{assistant_response}")
-
-    # Return the message back to be displayed in the chat interface
-    return jsonify(user_input=user_input, assistant_response=assistant_response)
-
+@error500_blueprint.app_errorhandler(500)
+def page_not_found(e): # Return error 500
+    return render_template('500.html'), 500
