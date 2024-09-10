@@ -11,7 +11,7 @@ error500_blueprint = Blueprint('error500', __name__)
 
 @home_blueprint.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('home.html')
 
 @login_blueprint.route('/login')
 def index():
