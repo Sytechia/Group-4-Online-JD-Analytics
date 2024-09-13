@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<nav>
+    <ul>
+      <li><a class="btn active" href="/">Home</a></li>
+      <li><a href="/login">Login</a></li>
+      <li><a href="/register">Register</a></li>
+      <li style="float:right"><a href="/profile">Profile</a></li>
+    </ul>
+  </nav>
+  <br>
+  <h1>{% block title %}CV Feedback{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <p>{{ feedback | replace('\n', '<br>')|safe }}</p>
+    <br>
+    <a href="{{ url_for('profile.profile') }}">Upload another CV</a>
+{% endblock %}
