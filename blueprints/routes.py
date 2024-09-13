@@ -10,26 +10,7 @@ profile_page_blueprint = Blueprint('profile', __name__)
 error_blueprint = Blueprint('error', __name__)
 error500_blueprint = Blueprint('error500', __name__)
 
-# Route that will SELECT a specific row in the database then load an Edit form 
-def edit():
-    if request.method == 'POST':
-        try:
-            # Use the hidden input value of id from the form to get the rowid
-            id = request.form['id']
-            # Connect to the database and SELECT a specific rowid
-            con = sqlite3.connect("database.db")
-            con.row_factory = sqlite3.Row
 
-            cur = con.cursor()
-            cur.execute("SELECT rowid, * FROM jobdesc WHERE rowid = " + id)
-
-            rows = cur.fetchall()
-        except:
-            id=None
-        finally:
-            con.close()
-            # Send the specific record of data to edit.html
-            return render_template("edit.html",rows=rows)
 
 @home_blueprint.route('/')
 def index():
