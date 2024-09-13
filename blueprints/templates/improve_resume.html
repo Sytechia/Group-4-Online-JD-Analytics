@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}CV Feedback{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <h1>CV Feedback</h1>
+    <p>{{ feedback }}</p>
+    <a href="{{ url_for('routes.upload_file') }}">Upload another CV</a>
+{% endblock %}
