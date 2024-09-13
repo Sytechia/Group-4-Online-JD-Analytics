@@ -13,6 +13,37 @@
   <h1>{% block title %}Profile Page{% endblock %}</h1>
   {% endblock %}
 
-{% block content %}
 
+{% block content %}
+  <center><h2>Skills Representation</h2></center>
+  <br>
+  <div class="row">
+    <div class="column">
+      <h3>Hard Skills</h3>
+      <img src="{{ url_for('profile.plot') }}" alt="Hard Skills Plot">
+    </div>
+    <div class="column">
+      <h3>Soft Skills</h3>
+      <img src="{{ url_for('profile.plot_soft_skills') }}" alt="Soft Skills Plot">
+    </div>
+  </div>
+
+  <br><br><br><br><br><br><br>
+  <div>
+<h1>Upload your CV for Feedback</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".pdf, .docx" required>
+        <button type="submit">Upload</button>
+    </form>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+  </div>
 {% endblock %}
+
