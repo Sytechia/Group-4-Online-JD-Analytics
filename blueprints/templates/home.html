@@ -8,9 +8,40 @@
       <li><a href="/register">Register</a></li>
       <li style="float:right"><a href="/profile">Profile</a></li>
     </ul>
-  </nav>
+</nav>
   <br>
   <h1>{% block title %}Home Page{% endblock %}</h1>
+
+<h3>Employee Information</h3>  
+<table border=5>  
+    <thead>  
+        <td>id</td>  
+        <td>job_id</td>  
+        <td>job_title</td>  
+        <td>job_detail_url</td>  
+        <td>job_listed</td>  
+        <td>company_name</td>  
+        <td>company_link</td>  
+        <td>company_location</td>  
+    </thead>  
+
+    {% for row in rows %}  
+       
+        <tr>  
+            <td>{{row["id"]}}</td>  
+            <td>{{row["job_id"]}}</td>  
+            <td>{{row["job_title"]}}</td>  
+            <td>{{row["job_detail_url"]}}</td>  
+            <td>{{row["job_listed"]}}</td>  
+            <td>{{row["company_name"]}}</td>  
+            <td>{{row["company_link"]}}</td>  
+            <td>{{row["company_location"]}}</td>  
+        </tr>  
+
+    {% endfor %}  
+</table>  
+<br><br>  
+
   {% endblock %}
 
 {% block content %}

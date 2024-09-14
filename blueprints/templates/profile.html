@@ -11,6 +11,24 @@
   </nav>
   <br>
   <h1>{% block title %}Profile Page{% endblock %}</h1>
+  <table border=5>  
+    <thead>  
+        <td>id</td>  
+        <td>email</td>  
+        <td>name</td>  
+        <td>password</td>  
+    </thead>  
+       
+    {% for row in rows %}  
+        <tr>  
+            <td>{{row["id"]}}</td>  
+            <td>{{row["email"]}}</td>  
+            <td>{{row["name"]}}</td>  
+            <td>{{row["password"]}}</td>  
+        </tr>  
+
+    {% endfor %}  
+</table> 
   {% endblock %}
 
 
