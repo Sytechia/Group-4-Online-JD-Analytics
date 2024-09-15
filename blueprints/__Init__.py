@@ -79,36 +79,6 @@ try:
 except sqlite3.Error as e:
     print(e)
 
-# try:
-#         # nm = request.form['nm']
-#         # addr = request.form['add']
-#         # city = request.form['city']
-#         # zip = request.form['zip']
-
-#         nm = 1
-#         addr = 312
-#         city = "Software Engineer"
-#         zip = "https://sg.jobstreet.com/software-engineer-jobs?jobId=78833906&type=standard"
-#         job_listed = "Software Engineer"
-#         company_name = "APPLE"
-#         company_link = "IDK"
-#         company_location = "SINGAPORE"
-
-#         # Connect to SQLite3 database and execute the INSERT
-#         with sqlite3.connect('database.db') as con:
-#             cur = con.cursor()
-#             cur.execute("INSERT INTO jobdesc (id, job_id, job_title, job_detail_url, job_listed, company_name, company_link, company_location) VALUES (?,?,?,?,?,?,?,?)",
-#                         (nm, addr, city, zip, job_listed, company_name, company_link, company_location))
-
-#             con.commit()
-#             msg = "Record successfully added to database"
-# except:
-#     con.rollback()
-#     print("Error in the INSERT")
-
-# finally:
-#     con.close()
-
 
 setup_database()
 
