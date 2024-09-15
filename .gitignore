@@ -1,0 +1,6 @@
+database.db
+.idea/
+__pycache__/
+blueprints/__pycache__/
+models/__pycache__/
+
