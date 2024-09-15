@@ -1,5 +1,6 @@
-
 database.db
-.idea/dataSources.xml
+.idea/
 __pycache__/
 blueprints/__pycache__/
+models/__pycache__/
+

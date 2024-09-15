@@ -1,5 +1,6 @@
-from flask import Flask,request
-from blueprints.routes import home_blueprint, login_blueprint, register_user_blueprint, profile_page_blueprint, error_blueprint, error500_blueprint
+from flask import Flask, request
+from blueprints.routes import home_blueprint, login_blueprint, register_user_blueprint, profile_page_blueprint, \
+    error_blueprint, error500_blueprint
 import sqlite3
 import scrapy
 import re
@@ -11,6 +12,7 @@ app.register_blueprint(register_user_blueprint)
 app.register_blueprint(profile_page_blueprint)
 app.register_blueprint(error_blueprint)
 app.register_blueprint(error500_blueprint)
+
 
 # Use this as initial function to set up the database
 def setup_database():
@@ -29,71 +31,85 @@ def setup_database():
             unique(job_detail_url,company_name,job_listed)
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS userdata (
+            id INTEGER PRIMARY KEY, 
+            email TEXT NOT NULL, 
+            name TEXT NOT NULL, 
+            password TEXT NOT NULL 
+        )
+    ''')
     conn.commit()
     return conn, cursor
+
 
 def AddRecord():
     pass
 
 
-### Ray you need to edit this portion of the code, putting it here as a reference
-def start_requests(api_url):
-    first_job_on_page = 0
-    first_url = api_url + str(first_job_on_page)
-    return scrapy.Request(url=first_url, callback=parse_job, meta={'first_job_on_page': first_job_on_page})
+sql_statements = [
+    '''CREATE TABLE IF NOT EXISTS jobdesc (
+            id INTEGER PRIMARY KEY,
+            job_id TEXT NOT NULL,
+            job_title TEXT NOT NULL,
+            job_detail_url TEXT NOT NULL,
+            job_listed TEXT NOT NULL,
+            company_name TEXT NOT NULL,
+            company_link TEXT,
+            company_location TEXT NOT NULL,
+            unique(job_detail_url,company_name,job_listed)
+    )''',
+    '''CREATE TABLE IF NOT EXISTS userdata (
+            id INTEGER PRIMARY KEY, 
+            email TEXT NOT NULL, 
+            name TEXT NOT NULL, 
+            password TEXT NOT NULL 
 
-def parse_job(response):
-    first_job_on_page = response.meta['first_job_on_page']
+    )''']
 
-    job_item = {}
-    jobs = response.css("li")
+# create a database connection
+conn = sqlite3.connect('database.db')
+try:
+    for statement in sql_statements:
+        conn.execute(statement)
 
-    num_jobs_returned = len(jobs)
-    print("******* Num Jobs Returned *******")
-    print(num_jobs_returned)
-    print('*****')
+    conn.commit()
+    conn.close()
+    print("Connected to database successfully")
+except sqlite3.Error as e:
+    print(e)
 
-    for job in jobs:
-        job_item['job_title'] = job.css("h3::text").get(default='not-found').strip()
-        job_item['job_detail_url'] = job.css(".base-card__full-link::attr(href)").get(default='not-found').strip()
-        job_item['job_listed'] = job.css('time::text').get(default='not-found').strip()
+# try:
+#         # nm = request.form['nm']
+#         # addr = request.form['add']
+#         # city = request.form['city']
+#         # zip = request.form['zip']
 
-        job_item['company_name'] = job.css('h4 a::text').get(default='not-found').strip()
-        job_item['company_link'] = job.css('h4 a::attr(href)').get(default='not-found')
-        job_item['company_location'] = job.css('.job-search-card__location::text').get(default='not-found').strip()
-        job_item['job_id'] = job.css('.job-search-card__location::text').get(default='not-found').strip()
+#         nm = 1
+#         addr = 312
+#         city = "Software Engineer"
+#         zip = "https://sg.jobstreet.com/software-engineer-jobs?jobId=78833906&type=standard"
+#         job_listed = "Software Engineer"
+#         company_name = "APPLE"
+#         company_link = "IDK"
+#         company_location = "SINGAPORE"
 
-        # Extract job ID from job_detail_url
-        job_id_match = re.search(r'view/[^/]+-(\d+)', job_item['job_detail_url'])
-        if job_id_match:
-            job_item['job_id'] = job_id_match.group(1)
-            print(f"Extracted Job ID: {job_item['job_id']}")
-        else:
-            print("No job ID found in the URL")
-            job_item['job_id'] = 'not-found'
+#         # Connect to SQLite3 database and execute the INSERT
+#         with sqlite3.connect('database.db') as con:
+#             cur = con.cursor()
+#             cur.execute("INSERT INTO jobdesc (id, job_id, job_title, job_detail_url, job_listed, company_name, company_link, company_location) VALUES (?,?,?,?,?,?,?,?)",
+#                         (nm, addr, city, zip, job_listed, company_name, company_link, company_location))
 
-        # Check if job ID already exists in the database
-        cursor.execute('SELECT 1 FROM jobs WHERE job_id = ?', (job_item['job_id'],))
-        if cursor.fetchone():
-            print(f"Job ID {job_item['job_id']} already exists: {job_item['job_detail_url']}")
-            continue
+#             con.commit()
+#             msg = "Record successfully added to database"
+# except:
+#     con.rollback()
+#     print("Error in the INSERT")
 
-        try:
-            cursor.execute('''
-                INSERT INTO jobs (job_id, job_title, job_detail_url, job_listed, company_name, company_link, company_location)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                job_item['job_id'], job_item['job_title'], job_item['job_detail_url'], job_item['job_listed'],
-                job_item['company_name'], job_item['company_link'], job_item['company_location']
-            ))
-            conn.commit()
-            print(f"Inserted job: {job_item['job_detail_url']}")
-        except sqlite3.IntegrityError:
-            print(f"Job listing already exists: {job_item['job_detail_url']}")
+# finally:
+#     con.close()
 
-        yield job_item
 
-conn, cursor = setup_database()
-api_url = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Python&location=Singapore&geoId=102454443&trk=public_jobs_jobs-search-bar_search-submit&start="
-request = start_requests(api_url)
+setup_database()
+
 
