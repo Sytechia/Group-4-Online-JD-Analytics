@@ -19,12 +19,13 @@ def setup_database():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS jobs (
+        CREATE TABLE IF NOT EXISTS jobdesc (
             id INTEGER PRIMARY KEY,
             job_id TEXT NOT NULL,
             job_title TEXT NOT NULL,
             job_detail_url TEXT NOT NULL,
             job_listed TEXT NOT NULL,
+            job_description TEXT,
             company_name TEXT NOT NULL,
             company_link TEXT,
             company_location TEXT NOT NULL,
@@ -46,40 +47,11 @@ def setup_database():
 def AddRecord():
     pass
 
-
-sql_statements = [
-    '''CREATE TABLE IF NOT EXISTS jobdesc (
-            id INTEGER PRIMARY KEY,
-            job_id TEXT NOT NULL,
-            job_title TEXT NOT NULL,
-            job_detail_url TEXT NOT NULL,
-            job_listed TEXT NOT NULL,
-            company_name TEXT NOT NULL,
-            company_link TEXT,
-            company_location TEXT NOT NULL,
-            unique(job_detail_url,company_name,job_listed)
-    )''',
-    '''CREATE TABLE IF NOT EXISTS userdata (
-            id INTEGER PRIMARY KEY, 
-            email TEXT NOT NULL, 
-            name TEXT NOT NULL, 
-            password TEXT NOT NULL 
-
-    )''']
-
-# create a database connection
-conn = sqlite3.connect('database.db')
 try:
-    for statement in sql_statements:
-        conn.execute(statement)
-
-    conn.commit()
+    conn, cursor = setup_database()
     conn.close()
     print("Connected to database successfully")
 except sqlite3.Error as e:
     print(e)
-
-
-setup_database()
 
 
