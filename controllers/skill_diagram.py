@@ -1,9 +1,43 @@
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import io
+
+from controllers.db_connections import get_db_connection
+
+import spacy
+nlp = spacy.load('en_core_web_md') #To load the language model
+
+categories = {
+    'soft_skills': {
+        'Collaboration': ['Interpersonal skills', 'Teamwork', 'Leadership', 'Empathy', 'Conflict resolution', 
+                          'Public speaking', 'Tolerance', 'Communication', 'Trust building', 'Cultural sensitivity', 
+                          'Active listening', 'Feedback'],
+        'Adaptability': ['Flexibility', 'Follows instructions', 'Improves based on feedback', 'Stress management', 
+                         'Can adapt to working independently', 'Resilience', 'Learning agility', 'Self-motivation', 
+                         'Openmindedness'],
+        'Resourcefulness': ['Works well under pressure', 'Creative thinking', 'Troubleshooting', 'Problem-solving', 
+                            'Innovative solutions', 'Organization', 'Problem identification', 'Risk management', 
+                            'Critical thinking', 'Prioritization'],
+        'Positive Attitude': ['Charismatic', 'Outgoing', 'Friendly', 'Welcoming', 'Patient', 'Motivating', 'Inspires others', 
+                              'Gratitude', 'Humility', 'Constructive communication', 'Kindness', 'Mindfulness'],
+        'Work Ethic': ['Motivated', 'Physical or mental stamina', 'Perform effectively in a deadline environment', 
+                       'Positive work ethic', 'Determined', 'Focused', 'Concentration', 'Accountability', 'Initiative', 
+                       'Continuous learning', 'Discipline', 'Reliability'],
+        'Willingness to learn': ['Active listener', 'Ability to follow instructions', 'Accepts feedback well', 
+                                 'Self-awareness', 'Professionalism', 'Willingness to try new things', 'Curiosity', 
+                                 'Growth mindset', 'Reflection', 'Information gathering', 'Self-directed learning'],
+        'Critical Thinking': ['Efficiency', 'Strategic planning', 'Artistic ability', 'Scheduling', 'Negotiation', 
+                              'Critical observation', 'Workflow management', 'Implementing change', 'Data interpretation', 
+                              'Problem analysis', 'Risk assessment', 'Hypothesis testing', 'Systematic thinking', 
+                              'Contextual understanding']
+    },
+    'hard_skills': {
+        'Years of Experience': '0-10000 HRS',  
+        'Industry Certifications': 'Certifications',  
+        'Qualifications': 'Education in the field'  
+    }
+}
 
 def soft_skill():
     proportions_soft_skills = [0.6, 0.75, 0.8, 0.9, 0.7, 0.8, 0.9]
@@ -77,3 +111,20 @@ def hard_skills():
     
     return img_io
 
+
+#con = get_db_connection()
+#cur = con.cursor()
+#cur.execute("SELECT * FROM userdata")
+#user_soft_skills: list = cur.fetchall()
+
+
+def comparing_word_similiar(given_skill,skill_smiliarity):
+    word_to_check = nlp(given_skill)
+    word_to_check_against = nlp(skill_smiliarity)
+    return word_to_check.similarity(word_to_check_against)
+
+def match_synonmy_words(user_skill):
+    pass
+    
+def tabulating_skill_level():
+    print('Score Tabulated successfully')
