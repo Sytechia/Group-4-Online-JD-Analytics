@@ -10,35 +10,68 @@
     </ul>
 </nav>
   <br>
-  <h1>{% block title %}Home Page{% endblock %}</h1>
+  <h1>{% block title %}Home Page{% endblock %}</h1><br><br>
+  <div>
+  <h3>Employee Information</h3>  
+  <table border=5>  
+      <thead>  
+          <td>id</td>  
+          <td>job_id</td>  
+          <td>job_title</td>  
+          <td>job_detail_url</td>  
+          <td>job_listed</td>  
+          <td>company_name</td>  
+          <td>company_link</td>  
+          <td>company_location</td>  
+      </thead>  
+  
+      {% for row in rows %}  
+         
+          <tr>  
+              <td>{{row["id"]}}</td>  
+              <td>{{row["job_id"]}}</td>  
+              <td>{{row["job_title"]}}</td>  
+              <td>{{row["job_detail_url"]}}</td>  
+              <td>{{row["job_listed"]}}</td>  
+              <td>{{row["company_name"]}}</td>  
+              <td>{{row["company_link"]}}</td>  
+              <td>{{row["company_location"]}}</td>  
+          </tr>  
+  
+      {% endfor %}  
+    </div>
 
-<h3>Employee Information</h3>  
-<table border=5>  
-    <thead>  
-        <td>id</td>  
-        <td>job_id</td>  
-        <td>job_title</td>  
-        <td>job_detail_url</td>  
-        <td>job_listed</td>  
-        <td>company_name</td>  
-        <td>company_link</td>  
-        <td>company_location</td>  
-    </thead>  
-
-    {% for row in rows %}  
-       
-        <tr>  
-            <td>{{row["id"]}}</td>  
-            <td>{{row["job_id"]}}</td>  
-            <td>{{row["job_title"]}}</td>  
-            <td>{{row["job_detail_url"]}}</td>  
-            <td>{{row["job_listed"]}}</td>  
-            <td>{{row["company_name"]}}</td>  
-            <td>{{row["company_link"]}}</td>  
-            <td>{{row["company_location"]}}</td>  
-        </tr>  
-
-    {% endfor %}  
+  <h1>Recent 10 Job Listings</h1>
+  <div class="scroll-container">
+    {% for recent_10_row in recent_10_rows %}
+    <div class="tile">
+        <div>
+            <h3><a href="{{ recent_10_row[1] }}" target="_blank">{{ recent_10_row[0] }}</a></h3>
+            <p>{{ recent_10_row[3] }}</p>
+        </div>
+        <div class="tile-info">
+            <p>Location: {{ recent_10_row[4] }}</p>
+            <p>Date Listed: {{ recent_10_row[2] }}</p>
+        </div>
+    </div>
+    {% endfor %}
+  </div>
+  <br><br>
+    <h1>Top 10 Listings Related to Interest</h1>
+  <div class="scroll-container">
+    {% for top_10_row in top_10_rows %}
+    <div class="tile">
+        <div>
+            <h3><a href="{{ top_10_row[1] }}" target="_blank">{{ top_10_row[0] }}</a></h3>
+            <p>{{ top_10_row[3] }}</p>
+        </div>
+        <div class="tile-info">
+            <p>Location: {{ top_10_row[4] }}</p>
+            <p>Date Listed: {{ top_10_row[2] }}</p>
+        </div>
+    </div>
+    {% endfor %}
+  </div> 
 </table>  
 <br><br>  
 
