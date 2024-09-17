@@ -25,7 +25,7 @@ def index():
     # con.row_factory = sqlite3.Row
 
     con = get_db_connection()
-    
+
     cur = con.cursor()
     cur.execute("SELECT * FROM jobdesc")
     rows = cur.fetchall()
