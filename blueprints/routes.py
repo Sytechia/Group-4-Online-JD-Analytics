@@ -8,6 +8,7 @@ import os
 from blueprints.jdresume import process_cv 
 from blueprints.config import Config
 from blueprints.utils import allowed_file
+import pdfplumber
 
 home_blueprint = Blueprint('home', __name__)
 login_blueprint = Blueprint('login', __name__)
@@ -60,11 +61,30 @@ def upload_file():
             file.save(file_path)
 
             # Process the CV and get feedback
-            feedback = process_cv(file_path, filename)
+            # feedback = process_cv(file_path, filename)
+
+            resume_text = extract_text_from_pdf(file_path)
+            resume_text_clean = resume_text.lower()
+            resume_text_no_spacing = resume_text_clean.replace('\n', ' ').strip()
+            resume_text_no_spacing = resume_text_no_spacing.replace('(cid:425)', 'tt')  # Example for 'better'
+            resume_text_no_spacing = resume_text_no_spacing.replace('(cid:332)', 'ft')  # Example for 'Microsoft'
+            resume_text_no_spacing = resume_text_no_spacing.replace('(cid:415)', 'ti')  # Example for 'action'
+
+            # Print extracted text to the terminal
+            print(f"Extracted Text from {filename}:")
+            print(resume_text_no_spacing)
 
             return render_template('improve_resume.html', feedback=feedback)
     else:
         return render_template('resume_upload.html')
+    
+# Function to extract text from the uploaded PDF
+def extract_text_from_pdf(file_path):
+    text = ""
+    with pdfplumber.open(file_path) as pdf:
+        for page in pdf.pages:
+            text += page.extract_text()
+    return text
     
 # Initialize Flask app
 app = Flask(__name__)
