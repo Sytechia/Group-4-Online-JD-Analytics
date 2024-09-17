@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import io
@@ -38,6 +40,7 @@ categories = {
 }
 
 def soft_skill():
+    
     proportions_soft_skills = [0.6, 0.75, 0.8, 0.9, 0.7, 0.8, 0.9]
     labels = ['Collaboration', 'Adaptability', 'Resourcefulness', 'Positive Attitude', 'Work Ethic', 'Willingness to Learn', 'Critical Thinking']
     N_SOFT_SKILLS = len(proportions_soft_skills)
@@ -70,6 +73,7 @@ def soft_skill():
     img_io2 = io.BytesIO()
     plt.savefig(img_io2, format='png', transparent=True, bbox_inches='tight')
     img_io2.seek(0)
+    plt.close(fig)
     
     return img_io2
 
@@ -106,6 +110,7 @@ def hard_skills():
     img_io = io.BytesIO()
     plt.savefig(img_io, format='png', transparent=True, bbox_inches='tight')
     img_io.seek(0)
+    plt.close(fig)
     
     return img_io
 
