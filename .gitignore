@@ -3,4 +3,5 @@ database.db
 __pycache__/
 blueprints/__pycache__/
 models/__pycache__/
+test.py
 
