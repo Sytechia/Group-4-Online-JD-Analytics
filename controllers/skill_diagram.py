@@ -5,8 +5,6 @@ import io
 
 from controllers.db_connections import get_db_connection
 
-import spacy
-nlp = spacy.load('en_core_web_md') #To load the language model
 
 categories = {
     'soft_skills': {
@@ -111,20 +109,3 @@ def hard_skills():
     
     return img_io
 
-
-#con = get_db_connection()
-#cur = con.cursor()
-#cur.execute("SELECT * FROM userdata")
-#user_soft_skills: list = cur.fetchall()
-
-
-def comparing_word_similiar(given_skill,skill_smiliarity):
-    word_to_check = nlp(given_skill)
-    word_to_check_against = nlp(skill_smiliarity)
-    return word_to_check.similarity(word_to_check_against)
-
-def match_synonmy_words(user_skill):
-    pass
-    
-def tabulating_skill_level():
-    print('Score Tabulated successfully')
