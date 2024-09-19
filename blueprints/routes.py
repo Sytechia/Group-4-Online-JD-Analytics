@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, jsonify, flash, send_file
 import sys
 from secret_key import client
 from controllers.db_connections import get_db_connection
-
 from controllers.skill_diagram import soft_skill, hard_skills
 
 import os
@@ -17,6 +16,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from blueprints.pdfReader import compare_resume_to_metrics, extract_keywords_from_metrics, extract_text_from_pdf, preprocess_text
+from blueprints.dumpText import insert_resume_text
 from pathlib import Path
 
 
@@ -138,7 +138,7 @@ def profile():
             # feedback = process_cv(file_path, filename)
 
             resume_text = extract_text_from_pdf(file_path)
-            # print("Text from resume: ", resume_text)
+            print("Text from resume: ", resume_text)
 
             # Example usage in your function:
             ROOT_DIR = Path.cwd()
@@ -149,6 +149,10 @@ def profile():
             resume_keywords = preprocess_text(resume_text)
             metrics_keywords = extract_keywords_from_metrics(metrics_file_path, resume_keywords, threshold=80)
             matching_keywords = compare_resume_to_metrics(resume_keywords, metrics_keywords)
+
+            # Insert resume_text into database
+            userid = 1
+            insert_resume_text(userid, resume_text)
 
             return render_template('feedback.html', feedback=feedback)
     else:
