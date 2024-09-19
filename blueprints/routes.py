@@ -43,8 +43,9 @@ def index():
     
     user = ''
     if 'username' in session:
-        user = session["username"]
-        print(f'Logged in as {session["username"]}')
+        # user = session["username"]
+        user = session
+        print(f'Logged in as {user["username"]}')
     
     # Send the results of the SELECT to the home.html page
     return render_template('home.html',user = user,rows=rows,recent_10_rows =recent_10_rows,top_10_rows = top_10_rows)
