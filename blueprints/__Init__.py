@@ -23,7 +23,7 @@ Session(app)
 
 # Use this as initial function to set up the database
 def setup_database():
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('../database.db')
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS jobdesc (
@@ -32,9 +32,11 @@ def setup_database():
             job_title TEXT NOT NULL,
             job_detail_url TEXT NOT NULL,
             job_listed TEXT NOT NULL,
+            job_description TEXT,
             company_name TEXT NOT NULL,
             company_link TEXT,
             company_location TEXT NOT NULL,
+            job_position_level TEXT,
             unique(job_detail_url,company_name,job_listed)
         )
     ''')
@@ -49,9 +51,28 @@ def setup_database():
             is_admin INTEGER NOT NULL              
         )
     ''')
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS userdata (
+                id INTEGER PRIMARY KEY, 
+                email TEXT NOT NULL, 
+                name TEXT NOT NULL, 
+                password TEXT NOT NULL 
+        )
+    ''')
     conn.commit()
     return conn, cursor
 
+def AddRecord():
+    pass
+
+try:
+    conn, cursor = setup_database()
+    conn.close()
+    print("Connected to database successfully")
+except sqlite3.Error as e:
+    print(e)
+
 setup_database()
+
 
 

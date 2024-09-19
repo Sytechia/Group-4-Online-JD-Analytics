@@ -34,10 +34,10 @@ def index():
     cur.execute("SELECT * FROM jobdesc")
     rows = cur.fetchall()
     
-    cur.execute("SELECT job_title, job_detail_url,job_listed,company_name, company_location FROM jobdesc order by job_listed asc limit 10")
+    cur.execute("SELECT job_title, job_detail_url,job_listed,job_description, company_name, company_location FROM jobdesc order by job_listed asc limit 10")
     recent_10_rows = cur.fetchall()
  
-    cur.execute("SELECT job_title, job_detail_url,job_listed,company_name, company_location FROM jobdesc where job_title LIKE '%data%' order by job_listed asc limit 10")
+    cur.execute("SELECT job_title, job_detail_url,job_listed,job_description, company_name, company_location FROM jobdesc where job_title LIKE '%data%' order by job_listed asc limit 10")
     top_10_rows = cur.fetchall()
     con.close()
     
