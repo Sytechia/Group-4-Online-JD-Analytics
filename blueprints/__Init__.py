@@ -6,6 +6,7 @@ import scrapy
 import re
 from flask_login import LoginManager
 import os
+from flask_session import Session
 
 app = Flask(__name__)
 app.register_blueprint(home_blueprint)
@@ -16,16 +17,9 @@ app.register_blueprint(profile_page_blueprint)
 app.register_blueprint(error_blueprint)
 app.register_blueprint(error500_blueprint)
 
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-
-@login_manager.user_loader
-def load_user(user_id):
-    # since the user_id is just the primary key of our user table, use it in the query for the user
-    return 0
-
-app.secret_key = os.environ.get('SECRET_KEY')
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 # Use this as initial function to set up the database
 def setup_database():
