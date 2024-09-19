@@ -1,18 +1,25 @@
 from flask import Flask, request
 from blueprints.routes import home_blueprint, login_blueprint, register_user_blueprint, profile_page_blueprint, \
-    error_blueprint, error500_blueprint
+    error_blueprint, error500_blueprint, logout_blueprint
 import sqlite3
 import scrapy
 import re
+from flask_login import LoginManager
+import os
+from flask_session import Session
 
 app = Flask(__name__)
 app.register_blueprint(home_blueprint)
 app.register_blueprint(login_blueprint)
+app.register_blueprint(logout_blueprint)
 app.register_blueprint(register_user_blueprint)
 app.register_blueprint(profile_page_blueprint)
 app.register_blueprint(error_blueprint)
 app.register_blueprint(error500_blueprint)
 
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 # Use this as initial function to set up the database
 def setup_database():
@@ -36,9 +43,12 @@ def setup_database():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS userdata (
             id INTEGER PRIMARY KEY, 
-            email TEXT NOT NULL, 
-            name TEXT NOT NULL, 
-            password TEXT NOT NULL 
+            username TEXT NOT NULL, 
+            hashed_password TEXT NOT NULL,
+            nested_skills BLOB NOT NULL,
+            soft_skills BLOB NOT NULL,
+            hard_skills BLOB NOT NULL,
+            is_admin INTEGER NOT NULL              
         )
     ''')
     cursor.execute('''
@@ -52,7 +62,6 @@ def setup_database():
     conn.commit()
     return conn, cursor
 
-
 def AddRecord():
     pass
 
@@ -62,5 +71,8 @@ try:
     print("Connected to database successfully")
 except sqlite3.Error as e:
     print(e)
+
+setup_database()
+
 
 

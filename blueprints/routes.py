@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, flash, send_file, flash, redirect, current_app
+from flask import Blueprint, render_template, request, jsonify, flash, send_file, flash, redirect, current_app, session
 import sys
 from secret_key import client
 from controllers.db_connections import get_db_connection
@@ -8,9 +8,13 @@ from controllers.skill_diagram import soft_skill, hard_skills
 import os
 from controllers.resume import allowed_file, process_cv
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from flask_login import LoginManager, login_required, logout_user
 
 home_blueprint = Blueprint('home', __name__)
 login_blueprint = Blueprint('login', __name__)
+logout_blueprint = Blueprint('logout', __name__)
 register_user_blueprint = Blueprint('register', __name__)
 profile_page_blueprint = Blueprint('profile', __name__)
 error_blueprint = Blueprint('error', __name__)
@@ -37,60 +41,72 @@ def index():
     top_10_rows = cur.fetchall()
     con.close()
     
+    user = ''
+    if 'username' in session:
+        # user = session["username"]
+        user = session
+        print(f'Logged in as {user["username"]}')
     
     # Send the results of the SELECT to the home.html page
-    return render_template('home.html',rows=rows,recent_10_rows =recent_10_rows,top_10_rows = top_10_rows)
+    return render_template('home.html',user = user,rows=rows,recent_10_rows =recent_10_rows,top_10_rows = top_10_rows)
 
-@login_blueprint.route('/login')
+@login_blueprint.route('/login',methods = ["POST","GET"])
 def index():
-    # if request.method == 'POST':
-    #     email = request.form.get('email')
-    #     password = request.form.get('password')
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
 
-    #     user = User.query.filter_by(email=email).first()
-    #     if user:
-    #         if check_password_hash(user.password, password):
-    #             flash('Logged in successfully!', category='success')
-    #             login_user(user, remember=True)
-    #             return redirect(url_for('views.home'))
-    #         else:
-    #             flash('Incorrect password, try again.', category='error')
-    #     else:
-    #         flash('Email does not exist.', category='error')
+        con = get_db_connection()  
+        cur = con.cursor()
+        user = cur.execute('SELECT * FROM userdata WHERE username = ?', (username,)).fetchone()
+        print("Everything: ", user)
+        print("Id: ", user[0])
+        print("Name: ", user[1])
+        print("password: ", user['hashed_password'])
 
+        con.commit()  
+        con.close()
+
+        if user and check_password_hash(user['hashed_password'], password):
+            # session["user_id"] = user['id']
+            session['username'] = request.form['username']
+            # flash('Logged in successfully.')
+            return redirect("/")
+        else:
+            return render_template("login.html", message="Invalid username or password.")
     return render_template('login.html')
 
 @register_user_blueprint.route('/register',methods = ["POST","GET"])
 def index():
     msg = "msg" 
-    if request.method == "POST":  
-        try:  
-            # email = request.form["email"]  
-            # name = request.form["name"]  
-            # password = request.form["password1"]  
-            # password2 = request.form["password2"]  
+    if request.method == "POST":
 
-            id = 1  
-            email = request.form.get('email')  
-            name = request.form.get("name")  
-            password = request.form.get("password1")
-            password2 = request.form.get("password2")  
+        name = request.form.get("name")  
+        password = request.form.get("password1")
+        password2 = request.form.get("password2")
 
-            # with sqlite3.connect("database.db") as con:
-            con = get_db_connection()  
-            cur = con.cursor()  
-            cur.execute("INSERT into userdata (id, email, name, password) values (?,?,?,?)",(id,email,name,password))  
-            con.commit()  
-            msg = "User successfully Added" 
-            con.close()   
-        except:  
-            con.rollback()  
-            msg = "We can not add the user to the list" 
-        finally:  
-            return render_template("register.html",msg = msg)  
+        if not (name and password and password2):
+            return render_template("register.html", msg = "All fields are required.")  
+
+        hashed_password = generate_password_hash(password)
+        # hashed_password = password
+
+        # with sqlite3.connect("database.db") as con:
+        con = get_db_connection()  
+        cur = con.cursor()   
+        cur.execute("INSERT into userdata (username, hashed_password, nested_skills, soft_skills, hard_skills,  is_admin) values (?,?,?,?,?,?)",(name,hashed_password,'','','',1))  
+        con.commit()  
+        # msg = "User successfully Added" 
+        con.close()
+        return redirect("/login")
         
     return render_template('register.html')
 
+@logout_blueprint.route("/logout")
+def logout():
+    # logout_user()
+    session.pop("username", None)
+    return redirect("/login")
 
 @profile_page_blueprint.route('/profile', methods=['GET', 'POST'])
 def profile():
