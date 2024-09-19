@@ -36,7 +36,7 @@
 <div class="row">
     <div class="column">
         <h3>Hard Skills</h3>
-        {% if skills_available %}
+        {% if hard_skills_list %}
             <img src="{{ url_for('profile.plot') }}" alt="Hard Skills Plot">
         {% else %}
             <p>No Hard Skills data available.</p>
@@ -44,7 +44,7 @@
     </div>
     <div class="column">
         <h3>Soft Skills</h3>
-        {% if skills_available %}
+        {% if soft_skills_list %}
             <img src="{{ url_for('profile.plot_soft_skills') }}" alt="Soft Skills Plot">
         {% else %}
             <p>No Soft Skills data available.</p>

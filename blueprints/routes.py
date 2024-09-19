@@ -20,8 +20,6 @@ profile_page_blueprint = Blueprint('profile', __name__)
 error_blueprint = Blueprint('error', __name__)
 error500_blueprint = Blueprint('error500', __name__)
 
-skills_available = False
-
 @home_blueprint.route('/')
 def index():
     # Connect to the database
@@ -110,7 +108,6 @@ def profile():
     if 'username' not in session:
         return redirect('/login')
     else:
-        skills_set = False
         if request.method == 'POST':
             # Handle file upload and process the CV (already correctly implemented)
             if 'file' not in request.files:
@@ -140,31 +137,38 @@ def profile():
             rows = cur.fetchall()
             soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
             con.close()
-            skills_available = False
+            
             # Fetch soft and hard skills from the database
             soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
-            if not soft_skills_list or not hard_skills_list:
-                skills_available = False
+            if  soft_skills_list == [] or hard_skills_list == []:
+                return render_template('profile.html', rows=rows)
             else :
                 print("Soft skills: ", soft_skills_list)
-                
                 print("Hard skills: ", hard_skills_list)
-                skills_available = True
-                return render_template('profile.html', rows=rows, skills_available=skills_available)
+                return render_template('profile.html', rows=rows, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
 # Route for generating the hard skills plot
 @profile_page_blueprint.route('/plot.png')
 def plot():
-    soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
-    # Generate the plot using the fetched data
-    img_io = hard_skills(hard_skills_list)
-    return send_file(img_io, mimetype='image/png')
+        soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
+        if soft_skills_list == [] or hard_skills_list == []:
+            return render_template('404.html')
+        else:
+            # Generate the plot using the fetched data
+            img_io = hard_skills(hard_skills_list)
+            return send_file(img_io, mimetype='image/png')
+    
 
 # Route for generating the soft skills plot
 @profile_page_blueprint.route('/plotsoftskills.png')
 def plot_soft_skills():
-    soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
-    img_io2 = soft_skills(soft_skills_list)
-    return send_file(img_io2, mimetype='image/png')
+        soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
+        if soft_skills_list == [] or hard_skills_list == []:
+            return render_template('404.html')
+        else:
+            img_io2 = soft_skills(soft_skills_list)
+            return send_file(img_io2, mimetype='image/png')
+    
+        
 
 
 
