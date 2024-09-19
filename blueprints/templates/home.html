@@ -6,40 +6,41 @@
       <li><a class="btn active" href="/">Home</a></li>
       <li><a href="/login">Login</a></li>
       <li><a href="/register">Register</a></li>
+      <li><a href="/logout">Logout</a></li>
       <li style="float:right"><a href="/profile">Profile</a></li>
     </ul>
 </nav>
   <br>
   <h1>{% block title %}Home Page{% endblock %}</h1><br><br>
   <div>
-  <h3>Employee Information</h3>  
-  <table border=5>  
-      <thead>  
-          <td>id</td>  
-          <td>job_id</td>  
-          <td>job_title</td>  
-          <td>job_detail_url</td>  
-          <td>job_listed</td>  
-          <td>company_name</td>  
-          <td>company_link</td>  
-          <td>company_location</td>  
-      </thead>  
-  
-      {% for row in rows %}  
-         
-          <tr>  
-              <td>{{row["id"]}}</td>  
-              <td>{{row["job_id"]}}</td>  
-              <td>{{row["job_title"]}}</td>  
-              <td>{{row["job_detail_url"]}}</td>  
-              <td>{{row["job_listed"]}}</td>  
-              <td>{{row["company_name"]}}</td>  
-              <td>{{row["company_link"]}}</td>  
-              <td>{{row["company_location"]}}</td>  
-          </tr>  
-  
-      {% endfor %}  
-    </div>
+    <h3>Employee Information</h3>  
+    <table border=5>  
+        <thead>  
+            <td>id</td>  
+            <td>job_id</td>  
+            <td>job_title</td>  
+            <td>job_detail_url</td>  
+            <td>job_listed</td>  
+            <td>company_name</td>  
+            <td>company_link</td>  
+            <td>company_location</td>  
+        </thead>  
+    
+        {% for row in rows %}  
+           
+            <tr>  
+                <td>{{row["id"]}}</td>  
+                <td>{{row["job_id"]}}</td>  
+                <td>{{row["job_title"]}}</td>  
+                <td>{{row["job_detail_url"]}}</td>  
+                <td>{{row["job_listed"]}}</td>  
+                <td>{{row["company_name"]}}</td>  
+                <td>{{row["company_link"]}}</td>  
+                <td>{{row["company_location"]}}</td>  
+            </tr>  
+    
+        {% endfor %}  
+      </div>
 
   <h1>Recent 10 Job Listings</h1>
   <div class="scroll-container">
@@ -58,6 +59,7 @@
   </div>
   <br><br>
     <h1>Top 10 Listings Related to Interest</h1>
+    <h1>{{user}}</h1>
   <div class="scroll-container">
     {% for top_10_row in top_10_rows %}
     <div class="tile">
