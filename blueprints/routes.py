@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from flask_login import LoginManager, login_required, logout_user
-
+import time
 home_blueprint = Blueprint('home', __name__)
 login_blueprint = Blueprint('login', __name__)
 logout_blueprint = Blueprint('logout', __name__)
@@ -24,18 +24,19 @@ skills_available = False
 
 @home_blueprint.route('/')
 def index():
-    
+    # Connect to the database
     con = get_db_connection()
-
     cur = con.cursor()
+    # Fetch all the job descriptions from the database
     cur.execute("SELECT * FROM jobdesc")
     rows = cur.fetchall()
-    
+    # Fetch the 10 most recent job descriptions from the database
     cur.execute("SELECT job_title, job_detail_url,job_listed,job_description, company_name, company_location FROM jobdesc order by job_listed asc limit 10")
     recent_10_rows = cur.fetchall()
- 
+    # Fetch the 10 most recent job descriptions from the database that contain the word 'data'
     cur.execute("SELECT job_title, job_detail_url,job_listed,job_description, company_name, company_location FROM jobdesc where job_title LIKE '%data%' order by job_listed asc limit 10")
     top_10_rows = cur.fetchall()
+    # Commit the changes and close the connection
     con.close()
     
     user = ''
@@ -43,19 +44,7 @@ def index():
         user = session
         print(f'Logged in as {user["username"]}')
     
-        # Fetch soft and hard skills from the database
-        soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
-        
-        print("Soft skills: ", soft_skills_list)
-        print("Hard skills: ", hard_skills_list)
-        global skills_available
-        skills_available = True
-        # Generate plots and pass the data to your templates if needed
-        hard_skills(soft_skills_list)
-        soft_skills(hard_skills_list)
-    
 
-    # Send the results of the SELECT to the home.html page
     return render_template('home.html',user = user,rows=rows,recent_10_rows =recent_10_rows,top_10_rows = top_10_rows)
 
 @login_blueprint.route('/login',methods = ["POST","GET"])
@@ -78,7 +67,7 @@ def index():
         if user and check_password_hash(user['hashed_password'], password):
             # session["user_id"] = user['id']
             session['username'] = request.form['username']
-            # flash('Logged in successfully.')
+            #flash('Logged in successfully.')
             return redirect("/")
         else:
             return render_template("login.html", message="Invalid username or password.")
@@ -150,30 +139,34 @@ def profile():
             cur.execute("SELECT * FROM userdata WHERE username = ?", (session['username'],))
             rows = cur.fetchall()
             soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
-            global skills_available
-
             con.close()
-            return render_template('profile.html', rows=rows, skills_available=skills_available)
-
+            skills_available = False
+            # Fetch soft and hard skills from the database
+            soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
+            if not soft_skills_list or not hard_skills_list:
+                skills_available = False
+            else :
+                print("Soft skills: ", soft_skills_list)
+                
+                print("Hard skills: ", hard_skills_list)
+                skills_available = True
+                return render_template('profile.html', rows=rows, skills_available=skills_available)
 # Route for generating the hard skills plot
 @profile_page_blueprint.route('/plot.png')
 def plot():
     soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
-    
-    
     # Generate the plot using the fetched data
     img_io = hard_skills(hard_skills_list)
-
     return send_file(img_io, mimetype='image/png')
 
 # Route for generating the soft skills plot
 @profile_page_blueprint.route('/plotsoftskills.png')
 def plot_soft_skills():
     soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
-    # Generate the plot using the fetched data
     img_io2 = soft_skills(soft_skills_list)
-    
     return send_file(img_io2, mimetype='image/png')
+
+
 
 @error_blueprint.app_errorhandler(404)
 def page_not_found(e): # Return error 404

@@ -6,6 +6,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import io
+import time
 
 
 
@@ -42,7 +43,7 @@ categories = {
 }
 #Plot Soft Skills
 def soft_skills(proportions_soft_skills):
-    
+    time.sleep(1)
     labels = ['Collaboration', 'Adaptability', 'Resourcefulness', 'Positive Attitude', 'Work Ethic', 'Willingness to Learn', 'Critical Thinking']
     N_SOFT_SKILLS = len(proportions_soft_skills)
     proportions_soft_skills = np.append(proportions_soft_skills, 1)
@@ -75,11 +76,12 @@ def soft_skills(proportions_soft_skills):
     plt.savefig(img_io2, format='png', transparent=True, bbox_inches='tight')
     img_io2.seek(0)
     plt.close(fig)
-    
+    print("Soft skills plot generated")
     return img_io2
 
 #Plot Hard Skills
 def hard_skills(proportions_hard_skills):
+        
         labels = ['Year(s) of Experience', 'Industry Certifications', 'Qualifications']
         N_HARD_SKILLS = len(proportions_hard_skills)
         proportions_hard_skills = np.append(proportions_hard_skills, 1)
@@ -93,7 +95,7 @@ def hard_skills(proportions_hard_skills):
         cmap = plt.cm.rainbow_r
         colors = np.linspace(0, 1, N_HARD_SKILLS + 1)
         
-        fig, ax = plt.subplots(figsize=(6, 6))
+        fig1, ax = plt.subplots(figsize=(6, 6))
         
         ax.tripcolor(triang_backgr, colors, cmap=cmap, shading='gouraud', alpha=0.4)
         ax.tripcolor(triang_foregr, colors, cmap=cmap, shading='gouraud', alpha=0.8)
@@ -111,8 +113,11 @@ def hard_skills(proportions_hard_skills):
         img_io = io.BytesIO()
         plt.savefig(img_io, format='png', transparent=True, bbox_inches='tight')
         img_io.seek(0)
-        plt.close(fig)
+        plt.close()
+        print("Hard skills plot generated")
+        
         return img_io
+        
     
 def check_metrics_for_plot(session_username):
     # check if the skills metric is not None
