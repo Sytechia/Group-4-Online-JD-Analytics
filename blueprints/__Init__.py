@@ -29,6 +29,7 @@ def setup_database():
             company_name TEXT NOT NULL,
             company_link TEXT,
             company_location TEXT NOT NULL,
+            job_position_level TEXT,
             unique(job_detail_url,company_name,job_listed)
         )
     ''')
@@ -38,6 +39,14 @@ def setup_database():
             email TEXT NOT NULL, 
             name TEXT NOT NULL, 
             password TEXT NOT NULL 
+        )
+    ''')
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS userdata (
+                id INTEGER PRIMARY KEY, 
+                email TEXT NOT NULL, 
+                name TEXT NOT NULL, 
+                password TEXT NOT NULL 
         )
     ''')
     conn.commit()

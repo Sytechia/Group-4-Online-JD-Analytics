@@ -1,8 +1,14 @@
 import scrapy
-import re
+
 import sqlite3
-from bs4 import BeautifulSoup
+from scrapy.crawler import CrawlerProcess
+
+
+from blueprints import setup_database
 from controllers.parse_data import parse_job
+
+import time
+import requests
 
 class JobSpider(scrapy.Spider):
     name = "job_spider"
@@ -16,7 +22,6 @@ class JobSpider(scrapy.Spider):
         self.cursor = self.conn.cursor()  # Initialize the cursor
         self.parsed_jobs = []
 
-
     def parse(self, response):
         yield scrapy.Request(url=self.start_urls[0], callback=self.parse_data)
 
@@ -25,3 +30,10 @@ class JobSpider(scrapy.Spider):
         # yield from parse_job(response, self.cursor, self.conn)
         for job_item in parse_job(response, self.cursor, self.conn):
             self.parsed_jobs.append(job_item)
+
+
+if __name__ == "__main__":
+    conn, cursor = setup_database()
+    process = CrawlerProcess()
+    process.crawl(JobSpider)
+    process.start()
