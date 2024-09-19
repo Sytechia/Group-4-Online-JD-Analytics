@@ -18,7 +18,7 @@ class JobSpider(scrapy.Spider):
 
     def __init__(self):
         print("Initializing JobSpider and getting db connection!")
-        self.conn = sqlite3.connect('database.db')  # Establish a connection to the database
+        self.conn = sqlite3.connect('../database.db')  # Establish a connection to the database
         self.cursor = self.conn.cursor()  # Initialize the cursor
         self.parsed_jobs = []
 

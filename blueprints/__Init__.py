@@ -16,7 +16,7 @@ app.register_blueprint(error500_blueprint)
 
 # Use this as initial function to set up the database
 def setup_database():
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('../database.db')
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS jobdesc (
