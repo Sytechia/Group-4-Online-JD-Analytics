@@ -3,7 +3,7 @@ import sys
 from secret_key import client
 from controllers.db_connections import get_db_connection
 
-from controllers.skill_diagram import soft_skill, hard_skills
+from controllers.skill_diagram import check_metrics_for_plot, hard_skills, soft_skills
 
 import os
 from controllers.resume import allowed_file, process_cv
@@ -20,14 +20,11 @@ profile_page_blueprint = Blueprint('profile', __name__)
 error_blueprint = Blueprint('error', __name__)
 error500_blueprint = Blueprint('error500', __name__)
 
+skills_available = False
 
 @home_blueprint.route('/')
 def index():
-    # Connect to the SQLite3 datatabase and 
-    # SELECT rowid and all Rows from the jobdesc table.
-    # con = sqlite3.connect("database.db")
-    # con.row_factory = sqlite3.Row
-
+    
     con = get_db_connection()
 
     cur = con.cursor()
@@ -43,10 +40,21 @@ def index():
     
     user = ''
     if 'username' in session:
-        # user = session["username"]
         user = session
         print(f'Logged in as {user["username"]}')
     
+        # Fetch soft and hard skills from the database
+        soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
+        
+        print("Soft skills: ", soft_skills_list)
+        print("Hard skills: ", hard_skills_list)
+        global skills_available
+        skills_available = True
+        # Generate plots and pass the data to your templates if needed
+        hard_skills(soft_skills_list)
+        soft_skills(hard_skills_list)
+    
+
     # Send the results of the SELECT to the home.html page
     return render_template('home.html',user = user,rows=rows,recent_10_rows =recent_10_rows,top_10_rows = top_10_rows)
 
@@ -110,48 +118,61 @@ def logout():
 
 @profile_page_blueprint.route('/profile', methods=['GET', 'POST'])
 def profile():
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        
-        file = request.files['file']
-        
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-
-            # Process the CV and get feedback
-            feedback = process_cv(file_path, filename)
-
-            return render_template('feedback.html', feedback=feedback)
+    if 'username' not in session:
+        return redirect('/login')
     else:
-        con = get_db_connection()
+        skills_set = False
+        if request.method == 'POST':
+            # Handle file upload and process the CV (already correctly implemented)
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
 
-        cur = con.cursor()
-        cur.execute("SELECT * FROM userdata")
-        rows = cur.fetchall()
+            file = request.files['file']
 
-        con.close()
-        return render_template('profile.html',rows = rows)
-  
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+
+                # Process the CV and get feedback
+                feedback = process_cv(file_path, filename)
+
+                return render_template('feedback.html', feedback=feedback)
+        else:
+            con = get_db_connection()
+
+            cur = con.cursor()
+            cur.execute("SELECT * FROM userdata WHERE username = ?", (session['username'],))
+            rows = cur.fetchall()
+            soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
+            global skills_available
+
+            con.close()
+            return render_template('profile.html', rows=rows, skills_available=skills_available)
+
 # Route for generating the hard skills plot
 @profile_page_blueprint.route('/plot.png')
 def plot():
+    soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
     
-    img_io = hard_skills()
+    
+    # Generate the plot using the fetched data
+    img_io = hard_skills(hard_skills_list)
+
     return send_file(img_io, mimetype='image/png')
 
 # Route for generating the soft skills plot
 @profile_page_blueprint.route('/plotsoftskills.png')
 def plot_soft_skills():
-    img_io2  = soft_skill()
-
+    soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
+    # Generate the plot using the fetched data
+    img_io2 = soft_skills(soft_skills_list)
+    
     return send_file(img_io2, mimetype='image/png')
 
 @error_blueprint.app_errorhandler(404)

@@ -1,3 +1,5 @@
+
+from controllers.db_connections import get_db_connection
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -5,9 +7,9 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import io
 
-from controllers.db_connections import get_db_connection
 
 
+# Skill Set Metrics 
 categories = {
     'soft_skills': {
         'Collaboration': ['Interpersonal skills', 'Teamwork', 'Leadership', 'Empathy', 'Conflict resolution', 
@@ -38,10 +40,9 @@ categories = {
         'Qualifications': 'Education in the field'  
     }
 }
-
-def soft_skill():
+#Plot Soft Skills
+def soft_skills(proportions_soft_skills):
     
-    proportions_soft_skills = [0.6, 0.75, 0.8, 0.9, 0.7, 0.8, 0.9]
     labels = ['Collaboration', 'Adaptability', 'Resourcefulness', 'Positive Attitude', 'Work Ethic', 'Willingness to Learn', 'Critical Thinking']
     N_SOFT_SKILLS = len(proportions_soft_skills)
     proportions_soft_skills = np.append(proportions_soft_skills, 1)
@@ -77,40 +78,63 @@ def soft_skill():
     
     return img_io2
 
-def hard_skills():
-    proportions_hard_skills = [0.6, 0.75, 0.8]
-    labels = ['Year(s) of Experience', 'Industry Certifications', 'Qualifications']
-    N_HARD_SKILLS = len(proportions_hard_skills)
-    proportions_hard_skills = np.append(proportions_hard_skills, 1)
-    theta = np.linspace(0, 2 * np.pi, N_HARD_SKILLS, endpoint=False)
-    x = np.append(np.sin(theta), 0)
-    y = np.append(np.cos(theta), 0)
-    triangles_HARD_SKILLS = [[N_HARD_SKILLS, i, (i + 1) % N_HARD_SKILLS] for i in range(N_HARD_SKILLS)]
-    triang_backgr = tri.Triangulation(x, y, triangles_HARD_SKILLS)
-    triang_foregr = tri.Triangulation(x * proportions_hard_skills, y * proportions_hard_skills, triangles_HARD_SKILLS)
-    
-    cmap = plt.cm.rainbow_r
-    colors = np.linspace(0, 1, N_HARD_SKILLS + 1)
-    
-    fig, ax = plt.subplots(figsize=(6, 6))
-    
-    ax.tripcolor(triang_backgr, colors, cmap=cmap, shading='gouraud', alpha=0.4)
-    ax.tripcolor(triang_foregr, colors, cmap=cmap, shading='gouraud', alpha=0.8)
-    ax.triplot(triang_backgr, color='white', lw=2)
-    
-    for label, proportion, xi, yi in zip(labels, proportions_hard_skills[:-1], x, y):
-        ax.text(xi * 1.1, yi * 1.1, f'{label}: {int(proportion * 100)}%',
-                ha='left' if xi > 0.1 else 'right' if xi < -0.1 else 'center',
-                va='bottom' if yi > 0.1 else 'top' if yi < -0.1 else 'center')
-    
-    ax.axis('off')
-    ax.set_aspect('equal')
-    plt.subplots_adjust(left=0.2, right=0.8, top=0.8, bottom=0.2)
+#Plot Hard Skills
+def hard_skills(proportions_hard_skills):
+        labels = ['Year(s) of Experience', 'Industry Certifications', 'Qualifications']
+        N_HARD_SKILLS = len(proportions_hard_skills)
+        proportions_hard_skills = np.append(proportions_hard_skills, 1)
+        theta = np.linspace(0, 2 * np.pi, N_HARD_SKILLS, endpoint=False)
+        x = np.append(np.sin(theta), 0)
+        y = np.append(np.cos(theta), 0)
+        triangles_HARD_SKILLS = [[N_HARD_SKILLS, i, (i + 1) % N_HARD_SKILLS] for i in range(N_HARD_SKILLS)]
+        triang_backgr = tri.Triangulation(x, y, triangles_HARD_SKILLS)
+        triang_foregr = tri.Triangulation(x * proportions_hard_skills, y * proportions_hard_skills, triangles_HARD_SKILLS)
+        
+        cmap = plt.cm.rainbow_r
+        colors = np.linspace(0, 1, N_HARD_SKILLS + 1)
+        
+        fig, ax = plt.subplots(figsize=(6, 6))
+        
+        ax.tripcolor(triang_backgr, colors, cmap=cmap, shading='gouraud', alpha=0.4)
+        ax.tripcolor(triang_foregr, colors, cmap=cmap, shading='gouraud', alpha=0.8)
+        ax.triplot(triang_backgr, color='white', lw=2)
+        
+        for label, proportion, xi, yi in zip(labels, proportions_hard_skills[:-1], x, y):
+            ax.text(xi * 1.1, yi * 1.1, f'{label}: {int(proportion * 100)}%',
+                    ha='left' if xi > 0.1 else 'right' if xi < -0.1 else 'center',
+                    va='bottom' if yi > 0.1 else 'top' if yi < -0.1 else 'center')
+        
+        ax.axis('off')
+        ax.set_aspect('equal')
+        plt.subplots_adjust(left=0.2, right=0.8, top=0.8, bottom=0.2)
 
-    img_io = io.BytesIO()
-    plt.savefig(img_io, format='png', transparent=True, bbox_inches='tight')
-    img_io.seek(0)
-    plt.close(fig)
+        img_io = io.BytesIO()
+        plt.savefig(img_io, format='png', transparent=True, bbox_inches='tight')
+        img_io.seek(0)
+        plt.close(fig)
+        return img_io
     
-    return img_io
+def check_metrics_for_plot(session_username):
+    # check if the skills metric is not None
+    con = get_db_connection()
+    cur = con.cursor()
+    cur.execute("SELECT soft_skills, hard_skills FROM userdata WHERE username = ?", (session_username,))
+    row = cur.fetchone()
 
+    if row:
+        soft_skills_str = row['soft_skills']  # Should be a comma-separated string from the database
+        hard_skills_str = row['hard_skills']
+
+        if soft_skills_str and hard_skills_str:
+            # Ensure proper conversion of strings to float
+            try:
+                soft_skills_list = [float(skill.strip()) for skill in soft_skills_str.split(',')]
+                hard_skills_list = [float(skill.strip()) for skill in hard_skills_str.split(',')]
+                return soft_skills_list, hard_skills_list  
+            except ValueError:
+                # Handle conversion errors
+                print("Error: Could not convert soft or hard skills to float.")
+                return None, None
+    return None, None  
+
+    
