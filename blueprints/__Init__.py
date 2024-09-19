@@ -5,6 +5,7 @@ import sqlite3
 import scrapy
 import re
 from flask_login import LoginManager
+import os
 
 app = Flask(__name__)
 app.register_blueprint(home_blueprint)
@@ -24,8 +25,7 @@ def load_user(user_id):
     # since the user_id is just the primary key of our user table, use it in the query for the user
     return 0
 
-
-app.secret_key = 'f0d89bc17c879c8b6841607f74129badd0d52a5696cb02992e4e45068a547d62'
+app.secret_key = os.environ.get('SECRET_KEY')
 
 # Use this as initial function to set up the database
 def setup_database():
