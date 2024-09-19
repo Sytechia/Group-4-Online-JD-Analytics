@@ -6,26 +6,43 @@ from nltk.corpus import stopwords
 import pdfplumber
 
 # Step 1: Extract text from uploaded PDF using pdfplumber
+import pdfplumber
+import re
+
+import pdfplumber
+import re
+
+from PyPDF2 import PdfReader
+import re
+
 def extract_text_from_pdf(pdf_file_path):
     text = ""
     try:
-        with pdfplumber.open(pdf_file_path) as pdf:
-            for page in pdf.pages:
-                extracted_text = page.extract_text()
-                if extracted_text:
-                    text += extracted_text
+        # Open the PDF file using PdfReader
+        reader = PdfReader(pdf_file_path)
+        
+        # Iterate over each page and extract text
+        for page in reader.pages:
+            extracted_text = page.extract_text()
+            
+            if extracted_text:
+                text += extracted_text
 
-        # Clean up CID-related errors (patterns like (cid:###)), replacing with space
+        # Step 1: Clean up CID-related errors (patterns like (cid:###)), replacing with space
         text = re.sub(r'\(cid:\d{3,}\)', ' ', text)
 
-        # Remove extra newlines and normalize spaces
+        # Step 2: Insert spaces between lowercase and uppercase letters (for concatenated words)
+        text = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text)
+
+        # Step 3: Normalize multiple spaces and remove newlines
         text = re.sub(r'\s+', ' ', text).strip()
 
-        # Convert text to lowercase
+        # Step 4: Convert text to lowercase
         text = text.lower()
 
     except Exception as e:
         print(f"Error extracting text: {e}")
+
     return text
 
 # Step 2: Preprocess the extracted resume text
@@ -36,7 +53,7 @@ def preprocess_text(text):
     # Tokenize text into words
     words = word_tokenize(text)
 
-    # Remove stopwords
+    # Remove stopwords (e.g. "and", "the", "is")
     stop_words = set(stopwords.words('english'))
     filtered_words = [word for word in words if word not in stop_words]
 
