@@ -10,11 +10,15 @@ from fuzzywuzzy import fuzz, process
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import re
+from controllers.db_connections import get_db_connection
+import sqlite3
+import nltk
+
 
 
 # Initialize OpenAI API key
 openai.api_key = openai_api_key
-
+nltk.download('punkt')
 # Check if the uploaded file is allowed
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
@@ -73,7 +77,7 @@ def process_cv(file_path, filename):
 
 
 #<-----------------Matthew Codes Start ------------------------>
-def extract_text_from_pdf(pdf_file_path):
+def extract_text_from_pdf_matthew(pdf_file_path):
     text = ""
     try:
         # Open the PDF file using PdfReader
@@ -97,7 +101,7 @@ def extract_text_from_pdf(pdf_file_path):
 
         # Step 4: Convert text to lowercase
         text = text.lower()
-
+        print("Text extracted from PDF:", text)
     except Exception as e:
         print(f"Error extracting text: {e}")
 
@@ -165,4 +169,30 @@ def compare_resume_to_metrics(resume_keywords, combined_keywords):
 
     return matching_keywords
 
+# Function to insert resume text into the nested_skills column where userid = 1
+def insert_resume_text(userid, resume_text):
+    con = get_db_connection()  # Establish connection using helper function
+    cur = con.cursor()
+
+    try:
+        # Check if the user with userid 1 exists
+        cur.execute("SELECT 1 FROM userdata WHERE id = ?", (userid,))
+        user_exists = cur.fetchone()
+
+        if user_exists:
+            # Insert the resume text into the nested_skills column where userid = 1
+            cur.execute("UPDATE userdata SET nested_skills = ? WHERE id = ?", (resume_text, userid))
+            con.commit()
+            print(f"Resume text successfully inserted into 'nested_skills' for user ID: {userid}")
+        else:
+            # If user doesn't exist, return an error for frontend to handle
+            print("User ID not found. Trigger JavaScript alert for account creation.")
+            return {"status": "error", "message": "User ID not found. Please create an account."}
+
+    except sqlite3.Error as e:
+        print(f"An error occurred while interacting with the database: {e}")
+        return {"status": "error", "message": "Database error."}
+    
+    finally:
+        con.close()  # Close the connection
 #<-----------------Matthew Codes End ------------------------>

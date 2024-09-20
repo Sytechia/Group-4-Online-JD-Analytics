@@ -13,18 +13,14 @@
 <h1>{% block title %}Profile Page{% endblock %}</h1>
 <table border=5>  
     <thead>  
-        <td>id</td>  
-        <td>email</td>  
+        <td>id</td>    
         <td>name</td>  
-        <td>password</td>  
     </thead>  
        
     {% for row in rows %}  
         <tr>  
             <td>{{row["id"]}}</td>  
-            <td>{{row["email"]}}</td>  
-            <td>{{row["name"]}}</td>  
-            <td>{{row["password"]}}</td>  
+            <td>{{row["name"]}}</td>    
         </tr>  
     {% endfor %}  
 </table> 
@@ -55,6 +51,7 @@
 <div>
 <h1>Upload your CV for Feedback</h1>
     <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="form_type" value="get_feedback">
         <input type="file" name="file" accept=".pdf, .docx" required>
         <button type="submit">Upload</button>
     </form>
@@ -72,24 +69,22 @@
 <!-- New form for additional request -->
 <div>
 <h1>Update User's Skills</h1>
-    <form method="POST" action="/update_user_skills" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="form_type" value="update_user_skills">
             <label for="Resume-File" >File Upload*</span></label>
-            <input type="file" class="form-control" name="Resume-File" access="false" multiple="false" id="Resume-File" required="required" aria-required="true">
-            
-            <label for="highest_education_obtained" class="formbuilder-select-label">Highest Education Obtained*<span class="tooltip-element" tooltip="Degree">?</span></label>
-            <select class="form-control" name="highest_education_obtained" id="highest_education_obtained" required="required" aria-required="true">
+            <input type="file" name="file" accept=".pdf, .docx" required>
+            <label for="highest_education_obtained" >Highest Education Obtained*<span class="tooltip-element" tooltip="Degree">?</span></label>
+            <select name="highest_education_obtained" id="highest_education_obtained" required="required" aria-required="true">
             <option value="diploma" selected="true" id="highest_education_obtained-0">Diploma</option>
             <option value="advance_diploma" id="highest_education_obtained-1">Advance Diploma</option>
             <option value="bachelors_degree" id="highest_education_obtained-2">Bachelor's Degree</option>
             <option value="master_degree" id="highest_education_obtained-3">Master's Degree</option>
             <option value="phd" id="highest_education_obtained-4">Phd</option>
             </select>
-
             <label for="number_of_hours" >Number of Hours in the Field of Interest *<span class="tooltip-element" tooltip="0 - 10000 HRS">?</span></label>
-            <input type="text" placeholder="1234" class="form-control" name="number_of_hours" access="false" id="number_of_hours" title="0 - 10000 HRS" required="required" aria-required="true">
-
+            <input type="text" placeholder="1234" name="number_of_hours" access="false" id="number_of_hours" title="0 - 10000 HRS" required="required" aria-required="true">
             <label for="certification_number" >Number of Certification in the Field of Interest.<span class="tooltip-element" tooltip="Example: User ABC has AWS Cloud Practitioner and ECC CEH.  User has 2 certifications, hence the input will be 2">?</span></label>
-            <input type="text" placeholder="1" class="form-control" name="certification_number" access="false" id="certification_number" title="Example: User ABC has AWS Cloud Practitioner and ECC CEH.  User has 2 certifications, hence the input will be 2" required="required" aria-required="true">
+            <input type="text" placeholder="1" name="certification_number" access="false" id="certification_number" title="Example: User ABC has AWS Cloud Practitioner and ECC CEH.  User has 2 certifications, hence the input will be 2" required="required" aria-required="true">
  
             <button type="submit">Upload</button>
     </form>

@@ -12,12 +12,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from flask_login import LoginManager, login_required, logout_user
 
-import re
-import nltk
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from controllers.resume import  compare_resume_to_metrics, extract_keywords_from_metrics, extract_text_from_pdf, preprocess_text
-from controllers.dumpText import insert_resume_text
+
+from controllers.resume import  compare_resume_to_metrics, extract_keywords_from_metrics, preprocess_text, insert_resume_text, extract_text_from_pdf_matthew
 from pathlib import Path
 
 
@@ -118,52 +114,61 @@ def profile():
         return redirect('/login')
     else:
         if request.method == 'POST':
+            form_type = request.form.get('form_type')
+            print("Form type: ", form_type)
+            
             # Handle file upload and process the CV (already correctly implemented)
             if 'file' not in request.files:
                 flash('No file part')
                 return redirect(request.url)
-
             file = request.files['file']
-
-#             # Process the CV and get feedback
-#             # feedback = process_cv(file_path, filename)
-
-#             resume_text = extract_text_from_pdf(file_path)
-#             print("Text from resume: ", resume_text)
-
-#             # Example usage in your function:
-#             ROOT_DIR = Path.cwd()
-#             metrics_file_path = ROOT_DIR / 'metrics.md'  # Path to the metrics.md file
-
-#             # Call the steps within your function
-#             resume_text = extract_text_from_pdf(file_path)
-#             resume_keywords = preprocess_text(resume_text)
-#             metrics_keywords = extract_keywords_from_metrics(metrics_file_path, resume_keywords, threshold=80)
-#             matching_keywords = compare_resume_to_metrics(resume_keywords, metrics_keywords)
-
-#             # Insert resume_text into database
-#             userid = 1
-#             insert_resume_text(userid, resume_text)
 
             if file.filename == '':
                 flash('No selected file')
                 return redirect(request.url)
-
-
+            
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
-
+                        
+            if form_type == 'get_feedback':
+                print("Processing CV for Zac's Codes")
                 # Process the CV and get feedback
                 feedback = process_cv(file_path, filename)
 
                 return render_template('feedback.html', feedback=feedback)
+            elif form_type == 'update_user_skills':
+                
+                
+                # Process the CV and get feedback
+                resume_text = extract_text_from_pdf_matthew(file_path)
+                
+                
+                # Example usage in your function:
+                ROOT_DIR = Path.cwd()
+                metrics_file_path = ROOT_DIR / 'metrics.md'  # Path to the metrics.md file
+                               
+                # Call the steps within your function
+                resume_text = extract_text_from_pdf_matthew(file_path)
+                resume_keywords = preprocess_text(resume_text)
+                metrics_keywords = extract_keywords_from_metrics(metrics_file_path, resume_keywords, threshold=80)
+                matching_keywords = compare_resume_to_metrics(resume_keywords, metrics_keywords)
+                print(f"Matching keywords: {matching_keywords}")
+                return render_template('feedback.html')
+
+            #     # # Insert resume_text into database
+            #     # userid = 1
+            #     # insert_resume_text(userid, resume_text)
+            #     print("Processing Matthew Codes")
+            # else:
+            #     flash('Invalid form type')
+            #     return render_template('404.html'), 404
         else:
             con = get_db_connection()
 
             cur = con.cursor()
-            cur.execute("SELECT * FROM userdata WHERE username = ?", (session['username'],))
+            cur.execute("SELECT id,username FROM userdata WHERE username = ?", (session['username'],))
             rows = cur.fetchall()
             soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
             con.close()
@@ -176,6 +181,7 @@ def profile():
                 print("Soft skills: ", soft_skills_list)
                 print("Hard skills: ", hard_skills_list)
                 return render_template('profile.html', rows=rows, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+
 # Route for generating the hard skills plot
 @profile_page_blueprint.route('/plot.png')
 def plot():
@@ -187,7 +193,6 @@ def plot():
             img_io = hard_skills(hard_skills_list)
             return send_file(img_io, mimetype='image/png')
     
-
 # Route for generating the soft skills plot
 @profile_page_blueprint.route('/plotsoftskills.png')
 def plot_soft_skills():
@@ -198,10 +203,6 @@ def plot_soft_skills():
             img_io2 = soft_skills(soft_skills_list)
             return send_file(img_io2, mimetype='image/png')
     
-        
-
-
-
 @error_blueprint.app_errorhandler(404)
 def page_not_found(e): # Return error 404
     return render_template('404.html'), 404
