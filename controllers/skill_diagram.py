@@ -200,7 +200,7 @@ def calculate_hard_skills_score(user_experience, user_certifications, user_quali
     
     # Qualification score (scaled to 100 points, normalized to 1.0)
     qualifications_score_map = {
-        'High School': 0.4,
+        'Diploma': 0.4,
         'Associate Degree': 0.6,
         'Bachelor\'s Degree': 0.8,
         'Master\'s Degree': 0.9,
