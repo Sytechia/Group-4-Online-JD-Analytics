@@ -8,10 +8,10 @@
       <li><a href="/register">Register</a></li>
       <li style="float:right"><a class="btn active" href="/profile">Profile</a></li>
     </ul>
-  </nav>
-  <br>
-  <h1>{% block title %}Profile Page{% endblock %}</h1>
-  <table border=5>  
+</nav>
+<br>
+<h1>{% block title %}Profile Page{% endblock %}</h1>
+<table border=5>  
     <thead>  
         <td>id</td>  
         <td>email</td>  
@@ -26,28 +26,34 @@
             <td>{{row["name"]}}</td>  
             <td>{{row["password"]}}</td>  
         </tr>  
-
     {% endfor %}  
 </table> 
-  {% endblock %}
-
+{% endblock %}
 
 {% block content %}
-  <center><h2>Skills Representation</h2></center>
-  <br>
-  <div class="row">
+<center><h2>Skills Representation</h2></center>
+<br>
+<div class="row">
     <div class="column">
-      <h3>Hard Skills</h3>
-      <img src="{{ url_for('profile.plot') }}" alt="Hard Skills Plot">
+        <h3>Hard Skills</h3>
+        {% if hard_skills_list %}
+            <img src="{{ url_for('profile.plot') }}" alt="Hard Skills Plot">
+        {% else %}
+            <p>No Hard Skills data available.</p>
+        {% endif %}
     </div>
     <div class="column">
-      <h3>Soft Skills</h3>
-      <img src="{{ url_for('profile.plot_soft_skills') }}" alt="Soft Skills Plot">
+        <h3>Soft Skills</h3>
+        {% if soft_skills_list %}
+            <img src="{{ url_for('profile.plot_soft_skills') }}" alt="Soft Skills Plot">
+        {% else %}
+            <p>No Soft Skills data available.</p>
+        {% endif %}
     </div>
-  </div>
+</div>
 
-  <br><br><br><br><br><br><br>
-  <div>
+<br><br><br><br><br><br><br>
+<div>
 <h1>Upload your CV for Feedback</h1>
     <form method="POST" enctype="multipart/form-data">
         <input type="file" name="file" accept=".pdf, .docx" required>
@@ -62,6 +68,5 @@
             </ul>
         {% endif %}
     {% endwith %}
-  </div>
+</div>
 {% endblock %}
-
