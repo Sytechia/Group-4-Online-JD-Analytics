@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, request, jsonify, flash, send_file
 import sys
 from secret_key import client
 from controllers.db_connections import get_db_connection
-
 from controllers.skill_diagram import check_metrics_for_plot, hard_skills, soft_skills
+
 
 import os
 from controllers.resume import allowed_file, process_cv
@@ -11,7 +11,18 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from flask_login import LoginManager, login_required, logout_user
+
+import re
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from controllers.pdfReader import compare_resume_to_metrics, extract_keywords_from_metrics, extract_text_from_pdf, preprocess_text
+from controllers.dumpText import insert_resume_text
+from pathlib import Path
+
+
 import time
+
 home_blueprint = Blueprint('home', __name__)
 login_blueprint = Blueprint('login', __name__)
 logout_blueprint = Blueprint('logout', __name__)
@@ -116,9 +127,30 @@ def profile():
 
             file = request.files['file']
 
+#             # Process the CV and get feedback
+#             # feedback = process_cv(file_path, filename)
+
+#             resume_text = extract_text_from_pdf(file_path)
+#             print("Text from resume: ", resume_text)
+
+#             # Example usage in your function:
+#             ROOT_DIR = Path.cwd()
+#             metrics_file_path = ROOT_DIR / 'metrics.md'  # Path to the metrics.md file
+
+#             # Call the steps within your function
+#             resume_text = extract_text_from_pdf(file_path)
+#             resume_keywords = preprocess_text(resume_text)
+#             metrics_keywords = extract_keywords_from_metrics(metrics_file_path, resume_keywords, threshold=80)
+#             matching_keywords = compare_resume_to_metrics(resume_keywords, metrics_keywords)
+
+#             # Insert resume_text into database
+#             userid = 1
+#             insert_resume_text(userid, resume_text)
+
             if file.filename == '':
                 flash('No selected file')
                 return redirect(request.url)
+
 
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
