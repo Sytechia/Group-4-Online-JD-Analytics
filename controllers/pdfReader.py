@@ -3,15 +3,8 @@ from bs4 import BeautifulSoup
 from fuzzywuzzy import fuzz, process
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-import pdfplumber
 
 # Step 1: Extract text from uploaded PDF using pdfplumber
-import pdfplumber
-import re
-
-import pdfplumber
-import re
-
 from PyPDF2 import PdfReader
 import re
 

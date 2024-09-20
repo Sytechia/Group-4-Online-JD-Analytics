@@ -15,10 +15,9 @@ import re
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-from blueprints.pdfReader import compare_resume_to_metrics, extract_keywords_from_metrics, extract_text_from_pdf, preprocess_text
-from blueprints.dumpText import insert_resume_text
+from controllers.pdfReader import compare_resume_to_metrics, extract_keywords_from_metrics, extract_text_from_pdf, preprocess_text
+from controllers.dumpText import insert_resume_text
 from pathlib import Path
-
 
 home_blueprint = Blueprint('home', __name__)
 login_blueprint = Blueprint('login', __name__)
