@@ -133,7 +133,13 @@ def profile():
                         
             if form_type == 'get_feedback':
                 # Process the CV and get feedback
-                feedback = process_cv(file_path, filename)
+                feedback = str(process_cv(file_path, filename))
+                con = get_db_connection()
+                cur = con.cursor()
+                userid = 1
+                cur.execute("UPDATE userdata SET feedback = ? WHERE id = ?", (feedback,userid,))
+                con.commit()
+                con.close()
 
                 return render_template('feedback.html', feedback=feedback)
             elif form_type == 'update_user_skills':
@@ -154,11 +160,9 @@ def profile():
                 matching_keywords_string = ', '.join(matching_keywords)
 
                 stored_text = str({'Resume Text': matching_keywords_string , 'Number of hours': number_of_hours, 'Certification number': certification_number, 'Education level': education_level})
-                print("Stored text: ", stored_text)
                 # Insert resume_text into database
                 userid = 1
                 insert_resume_text(userid, stored_text)
-                userid = 1
                 con = get_db_connection()
                 cur = con.cursor()
                 cur.execute("SELECT id,username FROM userdata WHERE id = ?", (userid,))
@@ -176,7 +180,7 @@ def profile():
             userid = 1
             con = get_db_connection()
             cur = con.cursor()
-            cur.execute("SELECT id,username FROM userdata WHERE id = ?", (userid,))
+            cur.execute("SELECT id,username,feedback FROM userdata WHERE id = ?", (userid,))
             rows = cur.fetchall()
             con.close()
            

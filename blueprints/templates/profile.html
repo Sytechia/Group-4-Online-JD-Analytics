@@ -14,13 +14,15 @@
 <table border=5>  
     <thead>  
         <td>ID</td>    
-        <td>Username</td>  
+        <td>Username</td>
+        <td>Feedback</td>  
     </thead>  
        
     {% for row in rows %}  
         <tr>  
             <td>{{row["id"]}}</td>  
-            <td>{{row["username"]}}</td>    
+            <td>{{row["username"]}}</td>
+            <td>{{row["feedback"] | replace('\n', '<br>')|safe}}</td>    
         </tr>  
     {% endfor %}  
 </table> 
@@ -29,7 +31,7 @@
 {% block content %}
 <center><h2>Skills Representation</h2></center>
 <br>
-<div class="row">
+<div class="row" >
     <div class="column">
         <h3>Hard Skills</h3>
         {% if hard_skills_list %}
@@ -100,3 +102,4 @@
 
 
 {% endblock %}
+

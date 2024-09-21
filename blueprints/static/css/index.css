@@ -12,6 +12,12 @@ body {
     justify-content: center;
     align-items: center;
     background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    margin-top: 30px;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-y: auto;
 }.scroll-container {
     display: flex;
     overflow-x: auto;
@@ -145,3 +151,35 @@ background-color: #04AA6D;
     display: table;
     clear: both;
   }
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    z-index: 1000;
+}
+nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+nav ul li {
+    display: inline;
+    margin-right: 10px;
+}
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 14px 20px;
+    display: inline-block;
+}
+nav ul li a:hover {
+    background-color: #575757;
+}
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 20px; /* Increase padding to make the footer thicker */
+    height: 90px; /* Set a specific height if needed */
+}
