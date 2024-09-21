@@ -12,13 +12,11 @@ from nltk.corpus import stopwords
 import re
 from controllers.db_connections import get_db_connection
 import sqlite3
-import nltk
-
-
+from controllers.skill_diagram import calculate_score
 
 # Initialize OpenAI API key
 openai.api_key = openai_api_key
-nltk.download('punkt')
+
 # Check if the uploaded file is allowed
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
@@ -183,7 +181,7 @@ def insert_resume_text(userid, resume_text):
             # Insert the resume text into the nested_skills column where userid = 1
             cur.execute("UPDATE userdata SET nested_skills = ? WHERE id = ?", (resume_text, userid))
             con.commit()
-            print(f"Resume text successfully inserted into 'nested_skills' for user ID: {userid}")
+            calculate_score(userid)
         else:
             # If user doesn't exist, return an error for frontend to handle
             print("User ID not found. Trigger JavaScript alert for account creation.")

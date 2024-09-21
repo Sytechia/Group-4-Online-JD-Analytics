@@ -13,14 +13,14 @@
 <h1>{% block title %}Profile Page{% endblock %}</h1>
 <table border=5>  
     <thead>  
-        <td>id</td>    
-        <td>name</td>  
+        <td>ID</td>    
+        <td>Username</td>  
     </thead>  
        
     {% for row in rows %}  
         <tr>  
             <td>{{row["id"]}}</td>  
-            <td>{{row["name"]}}</td>    
+            <td>{{row["username"]}}</td>    
         </tr>  
     {% endfor %}  
 </table> 

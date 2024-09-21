@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, jsonify, flash, send_file
 import sys
 from secret_key import client
 from controllers.db_connections import get_db_connection
-from controllers.skill_diagram import check_metrics_for_plot, hard_skills, soft_skills
+from controllers.skill_diagram import check_metrics_for_plot, hard_skills, soft_skills,calculate_score
 
 
 import os
@@ -12,10 +12,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from flask_login import LoginManager, login_required, logout_user
 
-
 from controllers.resume import  compare_resume_to_metrics, extract_keywords_from_metrics, preprocess_text, insert_resume_text, extract_text_from_pdf_matthew
 from pathlib import Path
-
+import time
 
 home_blueprint = Blueprint('home', __name__)
 login_blueprint = Blueprint('login', __name__)
@@ -133,59 +132,66 @@ def profile():
                 file.save(file_path)
                         
             if form_type == 'get_feedback':
-                print("Processing CV for Zac's Codes")
                 # Process the CV and get feedback
                 feedback = process_cv(file_path, filename)
 
                 return render_template('feedback.html', feedback=feedback)
             elif form_type == 'update_user_skills':
-                
-                
-                # Process the CV and get feedback
-                resume_text = extract_text_from_pdf_matthew(file_path)
-                
-                
                 # Example usage in your function:
                 ROOT_DIR = Path.cwd()
                 metrics_file_path = ROOT_DIR / 'metrics.md'  # Path to the metrics.md file
-                               
-                # Call the steps within your function
+
+                # Call the function to extract keywords from the metrics.md file
                 resume_text = extract_text_from_pdf_matthew(file_path)
                 resume_keywords = preprocess_text(resume_text)
                 metrics_keywords = extract_keywords_from_metrics(metrics_file_path, resume_keywords, threshold=80)
-                matching_keywords = compare_resume_to_metrics(resume_keywords, metrics_keywords)
-                print(f"Matching keywords: {matching_keywords}")
-                return render_template('feedback.html')
+                matching_keywords = compare_resume_to_metrics(resume_keywords, metrics_keywords)                
+                
+                #Hard Skill insert
+                number_of_hours = request.form['number_of_hours']
+                certification_number = request.form['certification_number']
+                education_level = request.form['highest_education_obtained']
+                matching_keywords_string = ', '.join(matching_keywords)
 
-            #     # # Insert resume_text into database
-            #     # userid = 1
-            #     # insert_resume_text(userid, resume_text)
-            #     print("Processing Matthew Codes")
-            # else:
-            #     flash('Invalid form type')
-            #     return render_template('404.html'), 404
-        else:
-            con = get_db_connection()
-
-            cur = con.cursor()
-            cur.execute("SELECT id,username FROM userdata WHERE username = ?", (session['username'],))
-            rows = cur.fetchall()
-            soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
-            con.close()
+                stored_text = str({'Resume Text': matching_keywords_string , 'Number of hours': number_of_hours, 'Certification number': certification_number, 'Education level': education_level})
+                print("Stored text: ", stored_text)
+                # Insert resume_text into database
+                userid = 1
+                insert_resume_text(userid, stored_text)
+                userid = 1
+                con = get_db_connection()
+                cur = con.cursor()
+                cur.execute("SELECT id,username FROM userdata WHERE id = ?", (userid,))
+                rows = cur.fetchall()
+                con.close()
             
+                # Fetch soft and hard skills from the database
+                soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
+                if  soft_skills_list == [] or hard_skills_list == []:
+                    return render_template('profile.html', rows=rows)
+                else :
+                    return render_template('profile.html', rows=rows, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+
+        else:
+            userid = 1
+            con = get_db_connection()
+            cur = con.cursor()
+            cur.execute("SELECT id,username FROM userdata WHERE id = ?", (userid,))
+            rows = cur.fetchall()
+            con.close()
+           
             # Fetch soft and hard skills from the database
-            soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
+            soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
             if  soft_skills_list == [] or hard_skills_list == []:
                 return render_template('profile.html', rows=rows)
             else :
-                print("Soft skills: ", soft_skills_list)
-                print("Hard skills: ", hard_skills_list)
                 return render_template('profile.html', rows=rows, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
 
 # Route for generating the hard skills plot
 @profile_page_blueprint.route('/plot.png')
 def plot():
-        soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
+        userid = 1
+        soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
         if soft_skills_list == [] or hard_skills_list == []:
             return render_template('404.html')
         else:
@@ -196,7 +202,8 @@ def plot():
 # Route for generating the soft skills plot
 @profile_page_blueprint.route('/plotsoftskills.png')
 def plot_soft_skills():
-        soft_skills_list, hard_skills_list = check_metrics_for_plot(session['username'])
+        userid = 1
+        soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
         if soft_skills_list == [] or hard_skills_list == []:
             return render_template('404.html')
         else:
