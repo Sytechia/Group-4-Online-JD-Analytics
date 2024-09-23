@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block header %}
+<nav>
+    <ul>
+      <li><a class="btn active" href="/">Home</a></li>
+      <li><a href="/login">Login</a></li>
+      <li><a href="/register">Register</a></li>
+      <li><a href="/logout">Logout</a></li>
+      <li style="float:right"><a href="/profile">Profile</a></li>
+    </ul>
+</nav>
+  <br>
+  <h1>{% block title %}Admin Dashboard Page{% endblock %}</h1><br><br>
+    <table border="1">
+      <thead>
+          <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Is Admin</th>
+              <th>Actions</th>
+          </tr>
+      </thead>
+      <tbody>
+      {% for user in users %}
+          <tr>
+              <td>{{ user.id }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
+              <td>
+                  {% if not user.is_admin %}
+                  <a href="/admindashboard/make_admin/{{ user.id }}">Make Admin</a>
+                  {% endif %}
+                  <a href = "/admindashboard/delete/{{ user.id }}" onclick="return confirm('Are you sure?')">Delete</a>
+              </td>
+          </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+<br><br>  
+
+  {% endblock %}
+
+{% block content %}
+
+{% endblock %}
