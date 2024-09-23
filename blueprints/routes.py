@@ -53,7 +53,7 @@ def index():
     con.close()
     
     user = ''
-    if 'username' in session:
+    if 'id' in session:
         # user = session["username"]
         user = session
         print(f'Logged in as {user["username"]}')
@@ -80,9 +80,10 @@ def index():
 
         if user and check_password_hash(user['hashed_password'], password):
             # session["user_id"] = user['id']
-            user = User.get_by_username(user['username'])
-            login_user(user)
-            session['username'] = request.form['username']
+            userobj = User.get(user['id'])
+            login_user(userobj)
+            # session['username'] = request.form['username']
+            session['id'] = user['id']
             # flash('Logged in successfully.')
             return redirect("/")
         else:
@@ -118,7 +119,7 @@ def index():
 @logout_blueprint.route("/logout")
 def logout():
     logout_user()
-    session.pop("username", None)
+    session.pop("id", None)
     return redirect("/login")
 
 @admin_page_blueprint.route("/admindashboard")
