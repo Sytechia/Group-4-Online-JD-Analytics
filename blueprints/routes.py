@@ -9,8 +9,8 @@ import os
 from controllers.resume import allowed_file, process_cv
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-
-from flask_login import LoginManager, login_required, logout_user
+from flask_login import login_user, login_required, logout_user, current_user
+from .models import User
 
 home_blueprint = Blueprint('home', __name__)
 login_blueprint = Blueprint('login', __name__)
@@ -19,7 +19,6 @@ register_user_blueprint = Blueprint('register', __name__)
 profile_page_blueprint = Blueprint('profile', __name__)
 error_blueprint = Blueprint('error', __name__)
 error500_blueprint = Blueprint('error500', __name__)
-
 
 @home_blueprint.route('/')
 def index():
@@ -69,6 +68,8 @@ def index():
 
         if user and check_password_hash(user['hashed_password'], password):
             # session["user_id"] = user['id']
+            user = User.get_by_username(user['username'])
+            login_user(user)
             session['username'] = request.form['username']
             # flash('Logged in successfully.')
             return redirect("/")
@@ -104,11 +105,12 @@ def index():
 
 @logout_blueprint.route("/logout")
 def logout():
-    # logout_user()
+    logout_user()
     session.pop("username", None)
     return redirect("/login")
 
 @profile_page_blueprint.route('/profile', methods=['GET', 'POST'])
+@login_required
 def profile():
     if request.method == 'POST':
         if 'file' not in request.files:
