@@ -11,14 +11,26 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 from .models import User
+from functools import wraps
 
 home_blueprint = Blueprint('home', __name__)
 login_blueprint = Blueprint('login', __name__)
 logout_blueprint = Blueprint('logout', __name__)
 register_user_blueprint = Blueprint('register', __name__)
 profile_page_blueprint = Blueprint('profile', __name__)
+admin_page_blueprint = Blueprint('admin', __name__)
 error_blueprint = Blueprint('error', __name__)
 error500_blueprint = Blueprint('error500', __name__)
+
+# Custom decorator to restrict access to admin users
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            flash('You do not have permission to access this page.', 'danger')
+            return redirect("/")
+        return f(*args, **kwargs)
+    return decorated_function
 
 @home_blueprint.route('/')
 def index():
@@ -95,7 +107,7 @@ def index():
         # with sqlite3.connect("database.db") as con:
         con = get_db_connection()  
         cur = con.cursor()   
-        cur.execute("INSERT into userdata (username, hashed_password, nested_skills, soft_skills, hard_skills,  is_admin) values (?,?,?,?,?,?)",(name,hashed_password,'','','',1))  
+        cur.execute("INSERT into userdata (username, hashed_password, nested_skills, soft_skills, hard_skills,  is_admin) values (?,?,?,?,?,?)",(name,hashed_password,'','','',0))  
         con.commit()  
         # msg = "User successfully Added" 
         con.close()
@@ -108,6 +120,41 @@ def logout():
     logout_user()
     session.pop("username", None)
     return redirect("/login")
+
+@admin_page_blueprint.route("/admindashboard")
+@admin_required
+def admindashboard():
+    con = get_db_connection()
+    cur = con.cursor()
+    users = cur.execute('SELECT * FROM userdata').fetchall()
+    con.close()
+    return render_template('admindashboard.html',users = users)
+
+@admin_page_blueprint.route("/admindashboard/delete/<int:user_id>")
+@admin_required
+def delete_user(user_id):
+    if user_id == current_user.id:
+        flash('You cannot delete yourself.', 'danger')
+        return redirect('/admindashboard')
+    
+    con = get_db_connection()
+    cur = con.cursor()
+    cur.execute('DELETE FROM userdata WHERE id = ?', (user_id,))
+    con.commit()
+    con.close()
+    flash('User deleted successfully.', 'success')
+    return redirect(('/admindashboard'))
+
+@admin_page_blueprint.route("/admindashboard/make_admin/<int:user_id>")
+@admin_required
+def make_admin(user_id):
+    con = get_db_connection()
+    cur = con.cursor()
+    cur.execute('UPDATE userdata SET is_admin = 1 WHERE id = ?', (user_id,))
+    con.commit()
+    con.close()
+    flash('User granted admin rights.', 'success')
+    return redirect('/admindashboard')
 
 @profile_page_blueprint.route('/profile', methods=['GET', 'POST'])
 @login_required

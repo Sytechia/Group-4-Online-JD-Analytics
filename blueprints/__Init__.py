@@ -1,6 +1,6 @@
 from flask import Flask, request
 from blueprints.routes import home_blueprint, login_blueprint, register_user_blueprint, profile_page_blueprint, \
-    error_blueprint, error500_blueprint, logout_blueprint
+    error_blueprint, error500_blueprint, logout_blueprint, admin_page_blueprint
 import sqlite3
 import scrapy
 import re
@@ -15,6 +15,7 @@ app.register_blueprint(login_blueprint)
 app.register_blueprint(logout_blueprint)
 app.register_blueprint(register_user_blueprint)
 app.register_blueprint(profile_page_blueprint)
+app.register_blueprint(admin_page_blueprint)
 app.register_blueprint(error_blueprint)
 app.register_blueprint(error500_blueprint)
 
