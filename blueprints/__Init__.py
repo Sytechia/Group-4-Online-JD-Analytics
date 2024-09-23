@@ -57,15 +57,8 @@ def setup_database():
             nested_skills BLOB NOT NULL,
             soft_skills BLOB NOT NULL,
             hard_skills BLOB NOT NULL,
-            is_admin INTEGER NOT NULL              
-        )
-    ''')
-    cursor.execute('''
-            CREATE TABLE IF NOT EXISTS userdata (
-                id INTEGER PRIMARY KEY, 
-                email TEXT NOT NULL, 
-                name TEXT NOT NULL, 
-                password TEXT NOT NULL 
+            is_admin INTEGER NOT NULL,
+            feedback BLOB              
         )
     ''')
     conn.commit()

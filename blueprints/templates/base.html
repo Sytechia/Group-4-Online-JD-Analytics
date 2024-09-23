@@ -2,13 +2,14 @@
 <title>{% block title %}{% endblock %} - Flaskr</title>
 <link rel="stylesheet" href="../static/css/index.css">
 <head>
-</head>
-
-<body>
-<section class="content">
   <header>
     {% block header %}{% endblock %}
   </header>
+</head>
+
+<body class = "scrollable-container">
+<section class="content">
+ 
   {% for message in get_flashed_messages() %}
     <div class="flash">{{ message }}</div>
   {% endfor %}
@@ -16,3 +17,11 @@
 </section>
 
 </body>
+<br>
+<footer>
+  <div class="container" align="center">
+   <div id="footer">
+      <p>&copy Peter,Matthew,Ray,Thaedeus and s3rade</p>
+  </div>
+ </div>
+</footer>
