@@ -21,9 +21,15 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+
 # Use this as initial function to set up the database
 def setup_database():
-    conn = sqlite3.connect('./database.db')
+    # Database path needs to be here to avoid circular imports
+    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    CONFIG_PATH = os.path.join(ROOT_DIR, 'database.db')
+    print(f"Database path: {CONFIG_PATH}")
+
+    conn = sqlite3.connect(CONFIG_PATH)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS jobdesc (
@@ -55,9 +61,6 @@ def setup_database():
     conn.commit()
     return conn, cursor
 
-def AddRecord():
-    pass
-
 try:
     conn, cursor = setup_database()
     conn.close()
@@ -65,7 +68,6 @@ try:
 except sqlite3.Error as e:
     print(e)
 
-setup_database()
 
 
 

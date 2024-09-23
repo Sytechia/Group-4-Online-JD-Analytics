@@ -1,8 +1,12 @@
 import sqlite3
 from flask import request, jsonify
+import os
 
 def get_db_connection():
-    conn = sqlite3.connect('database.db')
+    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    CONFIG_PATH = os.path.join(ROOT_DIR, 'database.db')
+
+    conn = sqlite3.connect(CONFIG_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
