@@ -1,5 +1,5 @@
 import scrapy
-
+import nltk
 import sqlite3
 from scrapy.crawler import CrawlerProcess
 from controllers.parse_data import parse_job
@@ -21,7 +21,6 @@ class JobSpider(scrapy.Spider):
         self.parsed_jobs = []
 
 
-
     def parse(self, response):
         yield scrapy.Request(url=self.start_urls[0], callback=self.parse_data)
 
@@ -33,6 +32,9 @@ class JobSpider(scrapy.Spider):
 
 
 if __name__ == "__main__":
+    nltk.download('punkt')
+    nltk.download('averaged_perceptron_tagger_eng')
+    nltk.download('stopwords')
     process = CrawlerProcess()
     process.crawl(JobSpider)
     process.start()
