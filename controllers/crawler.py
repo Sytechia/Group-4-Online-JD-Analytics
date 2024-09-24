@@ -3,11 +3,12 @@ import scrapy
 import sqlite3
 from scrapy.crawler import CrawlerProcess
 
-from blueprints import setup_database
 from controllers.parse_data import parse_job
 
 import time
 import requests
+
+from db_connections import get_db_connection
 
 class JobSpider(scrapy.Spider):
     name = "job_spider"
@@ -20,7 +21,7 @@ class JobSpider(scrapy.Spider):
         ]
         print("Initializing JobSpider and getting db connection!")
         try:
-            self.conn = sqlite3.connect('../database.db')  # Establish a connection to the database
+            self.conn = get_db_connection()  # Establish a connection to the database
             self.cursor = self.conn.cursor()  # Initialize the cursor
             self.parsed_jobs = []
 
