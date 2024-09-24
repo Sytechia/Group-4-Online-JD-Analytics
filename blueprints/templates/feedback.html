@@ -14,7 +14,7 @@
 {% endblock %}
 
 {% block content %}
-    <p>{{ feedback | replace('\n', '<br>')|safe }}</p>
+    <p>{{ feedback | replace('\n', '<br>')| replace('**', '<b>')|safe }}</p>
     <br>
     <a href="{{ url_for('profile.profile') }}">Upload another CV</a>
 {% endblock %}

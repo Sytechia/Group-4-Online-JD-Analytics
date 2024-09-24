@@ -56,7 +56,6 @@ def index():
     user = ''
 
     if 'id' in session:
-        # user = session["username"]
         user = session
         print(f'Logged in as {user["username"]}')
     
@@ -66,31 +65,55 @@ def index():
 @login_blueprint.route('/login',methods = ["POST","GET"])
 def index():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        form_type = request.form.get('form_type')
+        if form_type == 'login':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            print("Username: ", username)
+            print("Password: ", password)
+            con = get_db_connection()  
+            cur = con.cursor()
+            user = cur.execute('SELECT * FROM userdata WHERE username = ?', (username,)).fetchone()
+            con.commit()  
+            con.close()
 
-        con = get_db_connection()  
-        cur = con.cursor()
-        user = cur.execute('SELECT * FROM userdata WHERE username = ?', (username,)).fetchone()
-        print("Everything: ", user)
-        print("Id: ", user[0])
-        print("Name: ", user[1])
-        print("password: ", user['hashed_password'])
-
-        con.commit()  
-        con.close()
-
-        if user and check_password_hash(user['hashed_password'], password):
-            # session["user_id"] = user['id']
-            userobj = User.get(user['id'])
-            login_user(userobj)
-            session['id'] = user['id']
-            session['username'] = request.form['username']
-            #flash('Logged in successfully.')
-            return redirect("/")
+            if user and check_password_hash(user['hashed_password'], password):
+                
+                userobj = User.get(user['id'])
+                login_user(userobj)
+                session['id'] = user['id']
+                session['username'] = request.form['username']
+                
+                return redirect("/")
+            else:
+                return render_template("login.html", message="Invalid username or password.")
         else:
-            return render_template("login.html", message="Invalid username or password.")
-    return render_template('login.html')
+            name = request.form.get("name")  
+            password = request.form.get("password1")
+            password2 = request.form.get("password2")
+
+            if not (name and password and password2):
+                return render_template("login.html", msg = "All fields are required.")  
+
+            hashed_password = generate_password_hash(password)
+           
+            con = get_db_connection()  
+            cur = con.cursor()   
+            cur.execute("INSERT into userdata (username, hashed_password, nested_skills, soft_skills, hard_skills,  is_admin) values (?,?,?,?,?,?)",(name,hashed_password,'','','',0))  
+            con.commit()
+
+
+            cur.execute('SELECT id FROM userdata WHERE username = ?', (name,))  
+            new_user_id = cur.fetchone()['id'] 
+
+            userobj = User.get(new_user_id)
+            login_user(userobj)
+            session['id'] = new_user_id
+            session['username'] = name
+            con.close()
+            return redirect("/")
+    else:
+        return render_template('login.html')
 
 @register_user_blueprint.route('/register',methods = ["POST","GET"])
 def index():
@@ -189,7 +212,7 @@ def profile():
                 feedback = str(process_cv(file_path, filename))
                 con = get_db_connection()
                 cur = con.cursor()
-                userid = 1
+                userid = session['id']
                 cur.execute("UPDATE userdata SET feedback = ? WHERE id = ?", (feedback,userid,))
                 con.commit()
                 con.close()
@@ -214,7 +237,7 @@ def profile():
 
                 stored_text = str({'Resume Text': matching_keywords_string , 'Number of hours': number_of_hours, 'Certification number': certification_number, 'Education level': education_level})
                 # Insert resume_text into database
-                userid = 1
+                userid = session['id']
                 insert_resume_text(userid, stored_text)
                 con = get_db_connection()
                 cur = con.cursor()
@@ -230,7 +253,7 @@ def profile():
                     return render_template('profile.html', rows=rows, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
 
         else:
-            userid = 1
+            userid = session['id']
             con = get_db_connection()
             cur = con.cursor()
             cur.execute("SELECT id,username,feedback FROM userdata WHERE id = ?", (userid,))
@@ -247,7 +270,7 @@ def profile():
 # Route for generating the hard skills plot
 @profile_page_blueprint.route('/plot.png')
 def plot():
-        userid = 1
+        userid = session['id']
         soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
         if soft_skills_list == [] or hard_skills_list == []:
             return render_template('404.html')
@@ -259,7 +282,7 @@ def plot():
 # Route for generating the soft skills plot
 @profile_page_blueprint.route('/plotsoftskills.png')
 def plot_soft_skills():
-        userid = 1
+        userid = session['id']
         soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
         if soft_skills_list == [] or hard_skills_list == []:
             return render_template('404.html')
