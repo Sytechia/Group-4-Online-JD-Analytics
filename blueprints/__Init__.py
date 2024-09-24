@@ -22,52 +22,61 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 
+
 # Use this as initial function to set up the database
 def setup_database():
-    # Database path needs to be here to avoid circular imports
-    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    CONFIG_PATH = os.path.join(ROOT_DIR, 'database.db')
-    print(f"Database path: {CONFIG_PATH}")
+    try:
+        # Database path needs to be here to avoid circular imports
+        ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        CONFIG_PATH = os.path.join(ROOT_DIR, 'database.db')
+        print(f"Database path: {CONFIG_PATH}")
 
-    conn = sqlite3.connect(CONFIG_PATH)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS jobdesc (
-            id INTEGER PRIMARY KEY,
-            job_id TEXT NOT NULL,
-            job_title TEXT NOT NULL,
-            job_detail_url TEXT NOT NULL,
-            job_listed TEXT NOT NULL,
-            job_description TEXT,
-            company_name TEXT NOT NULL,
-            company_link TEXT,
-            company_location TEXT NOT NULL,
-            job_position_level TEXT,
-            unique(job_detail_url,company_name,job_listed)
-        )
-    ''')
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS userdata (
-            id INTEGER PRIMARY KEY, 
-            username TEXT NOT NULL, 
-            hashed_password TEXT NOT NULL,
-            nested_skills BLOB NOT NULL,
-            soft_skills BLOB NOT NULL,
-            hard_skills BLOB NOT NULL,
-            is_admin INTEGER NOT NULL,
-            feedback BLOB              
-        )
-    ''')
-    conn.commit()
-    return conn, cursor
+        conn = sqlite3.connect(CONFIG_PATH)
+        cursor = conn.cursor()
+        cursor.execute('''
+                CREATE TABLE IF NOT EXISTS jobdesc (
+                    id INTEGER PRIMARY KEY,
+                    job_id TEXT NOT NULL,
+                    job_title TEXT NOT NULL,
+                    job_detail_url TEXT NOT NULL,
+                    job_listed TEXT NOT NULL,
+                    job_description TEXT,
+                    company_name TEXT NOT NULL,
+                    company_link TEXT,
+                    company_location TEXT NOT NULL,
+                    job_position_level TEXT,
+                    UNIQUE(job_detail_url, company_name, job_listed)
+                )
+            ''')
+        cursor.execute('''
+                CREATE TABLE IF NOT EXISTS userdata (
+                    id INTEGER PRIMARY KEY,
+                    username TEXT NOT NULL,
+                    hashed_password TEXT NOT NULL,
+                    nested_skills BLOB NOT NULL,
+                    soft_skills BLOB NOT NULL,
+                    hard_skills BLOB NOT NULL,
+                    is_admin INTEGER NOT NULL,
+                    feedback BLOB
+                )
+            ''')
+        conn.commit()
+        print("Tables created successfully")
+        return conn, cursor
+    except sqlite3.Error as e:
+        print(f"SQLite error: {e}")
+        return None, None
+
 
 try:
     conn, cursor = setup_database()
-    conn.close()
-    print("Connected to database successfully")
+    if conn:
+        conn.close()
+        print("Connected to database successfully")
+    else:
+        print("Failed to connect to the database")
 except sqlite3.Error as e:
-    print(e)
-
+    print(f"Exception: {e}")
 
 
 

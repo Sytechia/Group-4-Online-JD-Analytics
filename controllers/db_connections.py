@@ -2,13 +2,18 @@ import sqlite3
 from flask import request, jsonify
 import os
 
+
 def get_db_connection():
+    print("Getting db connection!!!!")
     ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     CONFIG_PATH = os.path.join(ROOT_DIR, 'database.db')
-
-    conn = sqlite3.connect(CONFIG_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    if not os.path.exists(CONFIG_PATH):
+        print("Error: Database file does not exist")
+        return None
+    else:
+        conn = sqlite3.connect(CONFIG_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
 
 def create_job():
     data = request.get_json()
