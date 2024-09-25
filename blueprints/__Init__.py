@@ -8,6 +8,7 @@ from flask_login import LoginManager
 import os
 from flask_session import Session
 from .models import User
+import subprocess
 
 app = Flask(__name__)
 app.register_blueprint(home_blueprint)
@@ -25,6 +26,7 @@ Session(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+subprocess.run('python -m spacy download en_core_web_md', shell=True, check=True)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -58,7 +60,8 @@ def setup_database():
             soft_skills BLOB NOT NULL,
             hard_skills BLOB NOT NULL,
             is_admin INTEGER NOT NULL,
-            feedback BLOB              
+            feedback BLOB
+            field_of_interest TEXT               
         )
     ''')
     conn.commit()
