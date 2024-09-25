@@ -50,8 +50,9 @@
     </div>
 </div>
 <br><br><br><br><br><br><br>
-<div>
-<h1>Upload your CV for Feedback</h1>
+<div class="row" >
+<div class="column">
+<h1>Upload your CV for New Feedback</h1>
     <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="form_type" value="get_feedback">
         <input type="file" name="file" accept=".pdf, .docx" required>
@@ -69,7 +70,7 @@
 </div>
 
 <!-- New form for additional request -->
-<div>
+<div class="column">
 <h1>Update User's Skills</h1>
     <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="form_type" value="update_user_skills">
@@ -90,6 +91,7 @@
  
             <button type="submit">Upload</button>
     </form>
+</div>
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <ul>
