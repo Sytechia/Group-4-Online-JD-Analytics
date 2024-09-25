@@ -32,6 +32,8 @@ def load_user(user_id):
 
 
 
+
+
 # Use this as initial function to set up the database
 def setup_database():
     try:
