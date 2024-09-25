@@ -36,7 +36,7 @@ def extract_text_from_docx(docx_file_path):
     return text
 
 # Function to get CV feedback using OpenAI API
-def get_cv_feedback(cv_text):
+def get_cv_feedback(cv_text,foi):
     prompt = f"""
     You are an expert in recruitment and resume evaluation. Please review the following CV and provide remarks regarding:
     1. Formatting
@@ -44,7 +44,7 @@ def get_cv_feedback(cv_text):
     3. Key Skills Highlighted
     4. Alignment with potential job roles
     5. Areas of improvement
-    
+    While considering my interest in the role of an {foi}
     CV: {cv_text}
     """
     
@@ -61,7 +61,7 @@ def get_cv_feedback(cv_text):
     
     return (f'{feedback}')
 
-def process_cv(file_path, filename):
+def process_cv(file_path, filename,foi):
     if filename.endswith('.pdf'):
         cv_text = extract_text_from_pdf(file_path)
     elif filename.endswith('.docx'):
@@ -70,7 +70,7 @@ def process_cv(file_path, filename):
         raise ValueError("Unsupported file format")
 
     # Get feedback from OpenAI
-    feedback = get_cv_feedback(cv_text)
+    feedback = get_cv_feedback(cv_text,foi)
     return (f'{feedback}')
 
 
