@@ -20,7 +20,6 @@ class JobSpider(scrapy.Spider):
         self.cursor = self.conn.cursor()  # Initialize the cursor
         self.parsed_jobs = []
 
-
     def parse(self, response):
         yield scrapy.Request(url=self.start_urls[0], callback=self.parse_data)
 
