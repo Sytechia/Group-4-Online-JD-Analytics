@@ -1,11 +1,9 @@
 import scrapy
-
+import nltk
 import sqlite3
 from scrapy.crawler import CrawlerProcess
-
-
-from blueprints import setup_database
 from controllers.parse_data import parse_job
+from db_connections import get_db_connection
 
 import time
 import requests
@@ -18,7 +16,7 @@ class JobSpider(scrapy.Spider):
 
     def __init__(self):
         print("Initializing JobSpider and getting db connection!")
-        self.conn = sqlite3.connect('../database.db')  # Establish a connection to the database
+        self.conn = get_db_connection()  # Establish a connection to the database
         self.cursor = self.conn.cursor()  # Initialize the cursor
         self.parsed_jobs = []
 
@@ -33,7 +31,9 @@ class JobSpider(scrapy.Spider):
 
 
 if __name__ == "__main__":
-    conn, cursor = setup_database()
+    nltk.download('punkt')
+    nltk.download('averaged_perceptron_tagger_eng')
+    nltk.download('stopwords')
     process = CrawlerProcess()
     process.crawl(JobSpider)
     process.start()
