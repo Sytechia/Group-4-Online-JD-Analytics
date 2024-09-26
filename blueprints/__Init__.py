@@ -46,6 +46,7 @@ def setup_database():
                 CREATE TABLE IF NOT EXISTS jobdesc (
                     id INTEGER PRIMARY KEY,
                     job_id TEXT NOT NULL,
+                    original_job_title TEXT NOT NULL,
                     job_title TEXT NOT NULL,
                     job_detail_url TEXT NOT NULL,
                     job_listed TEXT NOT NULL,
