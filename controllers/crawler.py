@@ -14,7 +14,8 @@ import requests
 class JobSpider(scrapy.Spider):
     name = "job_spider"
     start_urls = [
-        "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Python&location=Singapore&geoId=102454443&trk=public_jobs_jobs-search-bar_search-submit&start=0"
+        f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Python&location=Singapore&geoId=102454443&trk=public_jobs_jobs-search-bar_search-submit&start={i*25}"
+        for i in range(5)
     ]
     handle_httpstatus_list = [301, 302]
 
