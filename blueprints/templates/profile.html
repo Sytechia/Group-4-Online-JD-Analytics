@@ -1,14 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-<nav>
-    <ul>
-      <li><a href="/">Home</a></li>
-      <li><a href="/login">Login</a></li>
-      <li><a href="/register">Register</a></li>
-      <li style="float:right"><a class="btn active" href="/profile">Profile</a></li>
-    </ul>
-</nav>
+{% include "navbar.html" %}
 <br>
 <h1>{% block title %}Profile Page{% endblock %}</h1>
 <table border=5>  
