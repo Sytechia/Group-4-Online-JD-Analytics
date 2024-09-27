@@ -9,6 +9,7 @@ import os
 from flask_session import Session
 
 app = Flask(__name__)
+app.secret_key = 'dev'
 app.register_blueprint(home_blueprint)
 app.register_blueprint(login_blueprint)
 app.register_blueprint(logout_blueprint)

@@ -75,7 +75,7 @@ def index():
 
         if user and check_password_hash(user['hashed_password'], password):
             # session["user_id"] = user['id']
-            session['username'] = request.form['username']
+            session['username'] = user['username']  # Set username from the database in session
             #flash('Logged in successfully.')
             return redirect("/")
         else:
