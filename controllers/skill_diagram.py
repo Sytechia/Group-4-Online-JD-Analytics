@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import io
 import time
-
-
+import spacy
+nlp = spacy.load('en_core_web_md') #python -m spacy download en_core_web_md
+import ast
 
 # Skill Set Metrics 
 categories = {
@@ -76,7 +77,6 @@ def soft_skills(proportions_soft_skills):
     plt.savefig(img_io2, format='png', transparent=True, bbox_inches='tight')
     img_io2.seek(0)
     plt.close(fig)
-    print("Soft skills plot generated")
     return img_io2
 
 #Plot Hard Skills
@@ -113,23 +113,20 @@ def hard_skills(proportions_hard_skills):
         img_io = io.BytesIO()
         plt.savefig(img_io, format='png', transparent=True, bbox_inches='tight')
         img_io.seek(0)
-        plt.close()
-        print("Hard skills plot generated")
-        
+        plt.close()        
         return img_io
         
     
-def check_metrics_for_plot(session_username):
+def check_metrics_for_plot(session_id):
     # check if the skills metric is not None
     con = get_db_connection()
     cur = con.cursor()
-    cur.execute("SELECT soft_skills, hard_skills FROM userdata WHERE username = ?", (session_username,))
+    cur.execute("SELECT soft_skills, hard_skills FROM userdata WHERE id = ?", (session_id,))
     row = cur.fetchone()
 
     if row:
         soft_skills_str = row['soft_skills']  # Should be a comma-separated string from the database
         hard_skills_str = row['hard_skills']
-
         if soft_skills_str and hard_skills_str:
             # Ensure proper conversion of strings to float
             try:
@@ -142,4 +139,101 @@ def check_metrics_for_plot(session_username):
                 return None, None
     return None, None  
 
+def calculate_score(session_id):
+    print("Calculating score with" + str(session_id)) 
+    con = get_db_connection()
+    cur = con.cursor()
+    cur.execute("SELECT nested_skills FROM userdata WHERE id = ?",(session_id,))
+    nested_skills = cur.fetchall()
+    con.close()
+    for row in nested_skills:
+        nested_skills_extracted = row[0]
+        nested_skills_extracted_list = ast.literal_eval(nested_skills_extracted)
+        
+    user_soft_skills= (str(nested_skills_extracted_list['Resume Text'])).split(", ")
+    user_experience_hours = int(nested_skills_extracted_list['Number of hours'])
+    user_certifications = int(nested_skills_extracted_list['Certification number'])
+    user_qualification = str(nested_skills_extracted_list['Education level'])
+    soft_skills_scores, hard_skills_scores = calculate_scores(user_soft_skills, user_experience_hours, user_certifications, user_qualification, categories)
+
+    formatted_soft_skills_scores = {k: float(format(v, '.2f')) for k, v in soft_skills_scores.items()}
+    formatted_hard_skills_scores = {k: float(format(v, '.2f')) for k, v in hard_skills_scores.items()}
+
+    soft_skills_scores_only = str(tuple(list(formatted_soft_skills_scores.values())))[1:-1]
+    hard_skills_scores_only = str(tuple(list(formatted_hard_skills_scores.values())))[1:-1]
+
+    con = get_db_connection()
+    cur = con.cursor()
+    cur.execute("UPDATE userdata SET soft_skills = ?, hard_skills = ?  WHERE id = ?",(soft_skills_scores_only,hard_skills_scores_only,session_id,))
+    con.commit()
+    con.close()
+
+# Function to check similarity using spacy
+def get_skill_similarity(skill1, skill2):
+    doc1 = nlp(skill1)
+    doc2 = nlp(skill2)
+    return doc1.similarity(doc2)
+
+# Function to check if a user-provided skill matches or is similar to any skill in a category
+def match_skills_with_synonyms(user_skills, category_skills):
+    matched_skills = []
+    similarity_threshold = 0.7  # Set similarity threshold (0 to 1, 1 being identical)
     
+    for user_skill in user_skills:
+        
+        if not isinstance(user_skill, str):
+            raise ValueError("User skill should be a string.")
+        for skill in category_skills:
+            
+            if not isinstance(skill, str):
+                raise ValueError("Category skill should be a string.")
+            similarity = get_skill_similarity(user_skill, skill)
+            if similarity >= similarity_threshold:
+                matched_skills.append((user_skill, skill, similarity))
+    
+    return matched_skills
+
+# Function to score each soft skill category considering synonyms/similar skills
+def calculate_soft_skills_score(user_skills, soft_skill_categories):
+    category_scores = {} 
+    
+    for category, skills in soft_skill_categories.items():
+        matched_skills = match_skills_with_synonyms(user_skills, skills)
+        matched_count = len(matched_skills)
+        category_scores[category] = min(matched_count / len(skills), 1.0)
+
+    return category_scores
+
+# Function to score hard skills (experience, certifications, qualifications)
+def calculate_hard_skills_score(user_experience, user_certifications, user_qualification):
+    max_experience_hours = 10000
+    experience_score = min(user_experience / max_experience_hours, 1.0)
+    
+    max_certifications = 5  
+    certification_score = min(user_certifications / max_certifications, 1.0)
+    
+    qualifications_score_map = {
+        'diploma': 0.4,
+        'advance_diploma': 0.6,
+        'bachelors_degree': 0.8,
+        'master_degree': 0.9,
+        'phd': 1.0
+    }
+    qualification_score = qualifications_score_map.get(user_qualification, 1.0)
+    
+    # Hard skills result as a dictionary
+    return {
+        'Experience': experience_score,
+        'Certifications': certification_score,
+        'Qualifications': qualification_score
+    }
+
+# Calculate total profile score
+def calculate_scores(user_soft_skills, user_experience, user_certifications, user_qualification, categories):
+    # Soft Skills Score
+    soft_skills_scores = calculate_soft_skills_score(user_soft_skills, categories['soft_skills'])
+    
+    # Hard Skills Score
+    hard_skills_scores = calculate_hard_skills_score(user_experience, user_certifications, user_qualification)
+    
+    return soft_skills_scores, hard_skills_scores, 

@@ -1,9 +1,12 @@
 # parse_data.py
 import re
 import sqlite3
+import openai
 from bs4 import BeautifulSoup
 import requests
 import time
+from secret_key import openai_api_key
+
 
 def parse_job(response, cursor, conn):
     soup = BeautifulSoup(response.body, 'html.parser')
@@ -12,8 +15,10 @@ def parse_job(response, cursor, conn):
     # print(soup.prettify())
 
     for job in jobs:
+
         job_item = {
             'job_id': None,
+            'original_job_title': None,
             'job_title': None,
             'job_detail_url': None,
             'job_listed': None,
@@ -43,10 +48,17 @@ def parse_job(response, cursor, conn):
                 print(f"Job ID {job_item['job_id']} already exists: {job_item['job_detail_url']}")
                 continue
 
-
             job_title_tag = job.find("h3", class_="base-search-card__title")
             if job_title_tag:
-                job_item['job_title'] = job_title_tag.get_text(strip=True)
+                original_title = job_title_tag.get_text(strip=True)
+                print(f"Original job title: {original_title}")
+                if isinstance(original_title, str):
+                    job_item['original_job_title'] = original_title
+                    job_item['job_title'] = extract_job_position(original_title)
+                    print(f"Cleaned job title: {job_item['job_title']}")
+                else:
+                    print(f"Invalid job title: {original_title}")
+                    continue
 
             job_listed_tag = job.find("time", class_=["job-search-card__listdate", "job-search-card__listdate--new"])
             if job_listed_tag:
@@ -72,7 +84,8 @@ def parse_job(response, cursor, conn):
             get_job_description_soup, job_position_level_soup = fetch_job_details(job_item['job_detail_url'])
 
             job_item['job_description'] = get_job_description(get_job_description_soup)
-            job_item['job_position_level'] = get_job_position_level(job_position_level_soup)
+            job_item['job_position_level'] = get_job_position_level(job_position_level_soup,job_item['job_description'])
+
 
             insert_job_into_db(cursor, conn, job_item)
 
@@ -82,10 +95,10 @@ def parse_job(response, cursor, conn):
 def insert_job_into_db(cursor, conn, job_item):
     try:
         cursor.execute('''
-            INSERT INTO jobdesc (job_id, job_title, job_detail_url, job_listed, job_description, company_name, company_link, company_location, job_position_level)
-            VALUES (?, ?, ?, ?, ?, ?, ?,?,?)
+            INSERT INTO jobdesc (job_id, original_job_title,job_title, job_detail_url, job_listed, job_description, company_name, company_link, company_location, job_position_level)
+            VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)
         ''', (
-            job_item['job_id'], job_item['job_title'], job_item['job_detail_url'], job_item['job_listed'], job_item['job_description'],
+            job_item['job_id'], job_item['original_job_title'], job_item['job_title'], job_item['job_detail_url'], job_item['job_listed'], job_item['job_description'],
             job_item['company_name'], job_item['company_link'], job_item['company_location'], job_item['job_position_level']
         ))
         conn.commit()
@@ -123,7 +136,7 @@ def get_job_description(job_description_soup):
     else:
         return "Could not find Job Description"
 
-def get_job_position_level(job_position_level_soup):
+def get_job_position_level(job_position_level_soup,job_description):
     if job_position_level_soup is None:
         return "Could not retrieve Job Description due to rate limiting"
 
@@ -131,7 +144,28 @@ def get_job_position_level(job_position_level_soup):
         header = item.find('h3', class_='description__job-criteria-subheader')
         if header and header.get_text(strip=True) == 'Seniority level':
             job_position_level = item.find('span', class_='description__job-criteria-text').get_text(strip=True)
-            return job_position_level
+            if job_position_level != 'Not Applicable':
+                return job_position_level
+            else:
+                prompt = (f"Based on the {job_description} job description, what is the seniority level of the job? You have to choose from the following options: "
+                          f"Entry level, Associate, Mid-Senior level, Director, Executive."
+                          f"Please choose the most appropriate option and only return the selected option.")
+
+                openai.api_key = openai_api_key
+                # Make a request to OpenAI's GPT model
+                response = openai.chat.completions.create(
+                    model="gpt-4o-mini",  # Ensure this is a valid model name
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=20
+                )
+
+                # Extract the text response
+                job_position_level = response.choices[0].message.content.strip()
+                return job_position_level
+
 
 
 "Ray make this function as a portion of your code as well"
@@ -145,6 +179,7 @@ def make_request_with_retries(url, retries=5, backoff_factor=1):
         else:
             return response
     return None
+""""""""
 
 def fetch_job_details(job_detail_url):
     response = make_request_with_retries(job_detail_url)
@@ -157,6 +192,28 @@ def fetch_job_details(job_detail_url):
     job_position_level = soup.find_all('li', class_='description__job-criteria-item')
     return job_description, job_position_level
 
+
+def extract_job_position(job_title):
+    prompt = (f"Extract the main job position from the following title, keeping relevant keywords like "
+              f"coding languages, experience levels (e.g., Senior, Graduate, Trainee), "
+              f"but remove location, dates, and other extra details: "
+              f"\"{job_title}\". Return only the job title and ensure no quotes are included.")
+
+
+    openai.api_key = openai_api_key
+    # Make a request to OpenAI's GPT model
+    response = openai.chat.completions.create(
+        model="gpt-4o-mini",  # Ensure this is a valid model name
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=20
+    )
+
+    # Extract the text response
+    job_position = response.choices[0].message.content.strip()
+    return job_position
 
 
 

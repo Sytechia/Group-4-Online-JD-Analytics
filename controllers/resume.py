@@ -4,6 +4,16 @@ import docx
 from secret_key import openai_api_key
 from blueprints.models import Config
 
+import re
+from bs4 import BeautifulSoup
+from fuzzywuzzy import fuzz, process
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+import re
+from controllers.db_connections import get_db_connection
+import sqlite3
+from controllers.skill_diagram import calculate_score
+
 # Initialize OpenAI API key
 openai.api_key = openai_api_key
 
@@ -26,7 +36,7 @@ def extract_text_from_docx(docx_file_path):
     return text
 
 # Function to get CV feedback using OpenAI API
-def get_cv_feedback(cv_text):
+def get_cv_feedback(cv_text,foi):
     prompt = f"""
     You are an expert in recruitment and resume evaluation. Please review the following CV and provide remarks regarding:
     1. Formatting
@@ -34,7 +44,7 @@ def get_cv_feedback(cv_text):
     3. Key Skills Highlighted
     4. Alignment with potential job roles
     5. Areas of improvement
-    
+    While considering my interest in the role of an {foi}
     CV: {cv_text}
     """
     
@@ -51,7 +61,7 @@ def get_cv_feedback(cv_text):
     
     return (f'{feedback}')
 
-def process_cv(file_path, filename):
+def process_cv(file_path, filename,foi):
     if filename.endswith('.pdf'):
         cv_text = extract_text_from_pdf(file_path)
     elif filename.endswith('.docx'):
@@ -60,5 +70,127 @@ def process_cv(file_path, filename):
         raise ValueError("Unsupported file format")
 
     # Get feedback from OpenAI
-    feedback = get_cv_feedback(cv_text)
+    feedback = get_cv_feedback(cv_text,foi)
     return (f'{feedback}')
+
+
+#<-----------------Matthew Codes Start ------------------------>
+def extract_text_from_pdf_matthew(pdf_file_path):
+    text = ""
+    try:
+        # Open the PDF file using PdfReader
+        reader = PdfReader(pdf_file_path)
+        
+        # Iterate over each page and extract text
+        for page in reader.pages:
+            extracted_text = page.extract_text()
+            
+            if extracted_text:
+                text += extracted_text
+
+        # Step 1: Clean up CID-related errors (patterns like (cid:###)), replacing with space
+        text = re.sub(r'\(cid:\d{3,}\)', ' ', text)
+
+        # Step 2: Insert spaces between lowercase and uppercase letters (for concatenated words)
+        text = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text)
+
+        # Step 3: Normalize multiple spaces and remove newlines
+        text = re.sub(r'\s+', ' ', text).strip()
+
+        # Step 4: Convert text to lowercase
+        text = text.lower()
+        print("Text extracted from PDF:", text)
+    except Exception as e:
+        print(f"Error extracting text: {e}")
+
+    return text
+
+# Step 2: Preprocess the extracted resume text
+def preprocess_text(text):
+    # Remove special characters and numbers
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+
+    # Tokenize text into words
+    words = word_tokenize(text)
+
+    # Remove stopwords (e.g. "and", "the", "is")
+    stop_words = set(stopwords.words('english'))
+    filtered_words = [word for word in words if word not in stop_words]
+
+    return filtered_words
+
+# Step 3: Extract skills from metrics.md file by cleaning up the HTML tags
+def extract_keywords_from_metrics(file_path, resume_keywords, threshold=80):
+    with open(file_path, 'r') as file:
+        metrics_text = file.read()
+
+    # Using BeautifulSoup to parse the HTML-like content in the file
+    soup = BeautifulSoup(metrics_text, 'html.parser')
+
+    # Find all list items <li> which contain the skills and convert them to lowercase
+    skills_list = [li.get_text(strip=True).lower() for li in soup.find_all('li')]
+
+    # Debugging: print the extracted skills list
+    # print(f"Extracted skills from metrics.md: {skills_list}")
+
+    # Use fuzzy matching to include similar keywords
+    similar_keywords = []
+    
+    for skill in skills_list:
+        # Use fuzzywuzzy to find keywords in the resume that match the skill with a given threshold
+        matches = process.extractBests(skill, resume_keywords, scorer=fuzz.ratio, score_cutoff=threshold)
+        # If there are matches, print them for debugging
+        if matches:
+            print(f"Matches for '{skill}' from resume_keywords: {matches}")
+        for match in matches:
+            similar_keywords.append(match[0])  # Append matched keyword
+
+    # Debugging: print the similar keywords found by fuzzy matching
+    # print(f"Similar keywords found by fuzzywuzzy: {similar_keywords}")
+
+    # Combine skills_list and similar_keywords into one list
+    combined_keywords = skills_list + similar_keywords
+
+    # Return the combined list of skills and similar keywords
+    return combined_keywords
+
+# Step 4: Compare resume keywords with metrics.md keywords
+def compare_resume_to_metrics(resume_keywords, combined_keywords):
+    # Debugging: Print the list of combined keywords
+    # print(f"Combined Keywords (metrics and fuzzy matches): {combined_keywords}")
+
+    # Step 4: Compare resume keywords with combined keywords
+    matching_keywords = [word for word in resume_keywords if word in combined_keywords]
+
+    # Debugging: Print the matching keywords found
+    print(f"Matching Keywords from resume: {matching_keywords}")
+
+    return matching_keywords
+
+# Function to insert resume text into the nested_skills column where userid = 1
+def insert_resume_text(userid, resume_text):
+    con = get_db_connection()  # Establish connection using helper function
+    cur = con.cursor()
+
+    try:
+        # Check if the user with userid 1 exists
+        cur.execute("SELECT 1 FROM userdata WHERE id = ?", (userid,))
+        user_exists = cur.fetchone()
+
+        if user_exists:
+            # Insert the resume text into the nested_skills column where userid = 1
+            cur.execute("UPDATE userdata SET nested_skills = ? WHERE id = ?", (resume_text, userid))
+            con.commit()
+            calculate_score(userid)
+        else:
+            # If user doesn't exist, return an error for frontend to handle
+            print("User ID not found. Trigger JavaScript alert for account creation.")
+            return {"status": "error", "message": "User ID not found. Please create an account."}
+
+    except sqlite3.Error as e:
+        print(f"An error occurred while interacting with the database: {e}")
+        return {"status": "error", "message": "Database error."}
+    
+    finally:
+        con.close()  # Close the connection
+#<-----------------Matthew Codes End ------------------------>

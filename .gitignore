@@ -5,3 +5,7 @@ blueprints/__pycache__/
 models/__pycache__/
 test.py
 .venv/
+/flask_session
+/nltk_data
+secret_key.py
+secret_key.py
