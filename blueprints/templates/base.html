@@ -4,15 +4,22 @@
 <head>
   <header>
     {% block header %}{% endblock %}
+    <center>
+      {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-message">
+                    <span>{{ messages[0] }}</span>
+                    <button class="close-btn" onclick="this.parentElement.style.display='none';">x</button>
+                </div>
+            {% endif %}
+        {% endwith %}
+      </center>
   </header>
 </head>
 
 <body class = "scrollable-container">
 <section class="content">
  
-  {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
   {% block content %}{% endblock %}
 </section>
 
