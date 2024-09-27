@@ -84,7 +84,7 @@ def index():
                 userobj = User.get(user['id'])
                 login_user(userobj)
                 session['id'] = user['id']
-                session['username'] = request.form['username']
+                session['username'] = user['username']
                 
                 return redirect("/")
             else:
@@ -170,7 +170,7 @@ def index():
 @logout_blueprint.route("/logout")
 def logout():
     logout_user()
-    session.pop("id", None)
+    session.pop("username", None)
     return redirect("/login")
 
 @admin_page_blueprint.route("/admindashboard")
