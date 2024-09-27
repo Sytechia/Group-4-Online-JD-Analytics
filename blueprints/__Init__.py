@@ -9,8 +9,10 @@ import os
 from flask_session import Session
 from .models import User
 import subprocess
+import nltk
 
 app = Flask(__name__)
+app.secret_key = 'dev'
 app.register_blueprint(home_blueprint)
 app.register_blueprint(login_blueprint)
 app.register_blueprint(logout_blueprint)
@@ -27,6 +29,9 @@ Session(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 subprocess.run('python -m spacy download en_core_web_md', shell=True, check=True)
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('punkt_tab')
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -46,6 +51,7 @@ def setup_database():
                 CREATE TABLE IF NOT EXISTS jobdesc (
                     id INTEGER PRIMARY KEY,
                     job_id TEXT NOT NULL,
+                    original_job_title TEXT NOT NULL,
                     job_title TEXT NOT NULL,
                     job_detail_url TEXT NOT NULL,
                     job_listed TEXT NOT NULL,
@@ -62,10 +68,10 @@ def setup_database():
                     id INTEGER PRIMARY KEY,
                     username TEXT NOT NULL,
                     hashed_password TEXT NOT NULL,
-                    nested_skills BLOB NOT NULL,
-                    soft_skills BLOB NOT NULL,
-                    hard_skills BLOB NOT NULL,
-                    is_admin INTEGER NOT NULL,
+                    nested_skills BLOB ,
+                    soft_skills BLOB ,
+                    hard_skills BLOB ,
+                    is_admin INTEGER ,
                     feedback BLOB,
                     field_of_interest TEXT
                 )
@@ -86,6 +92,5 @@ try:
         print("Failed to connect to the database")
 except sqlite3.Error as e:
     print(f"Exception: {e}")
-
 
 

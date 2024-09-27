@@ -41,7 +41,25 @@ def index():
     if 'username' not in session:
         return redirect('/login')
     else:
+        id = session['id']
+        con = get_db_connection()
+        cur = con.cursor()
+        cur.execute('SELECT soft_skills, hard_skills,feedback, field_of_interest FROM userdata WHERE id = ?', (id,))
+        results = cur.fetchone()
+        con.close()
+                       
+        if results:
+            keys = ['soft_skills', 'hard_skills', 'feedback', 'field_of_interest']
+            items_to_fill_up = [key for key, value in zip(keys, results) if value is None]
+            
+            if items_to_fill_up:
+                items_to_fill_up_str = ', '.join(items_to_fill_up)
+                flash(f'Please complete your profile ({items_to_fill_up_str}) to access this page.', 'danger')
+                return redirect('/register')
+        
         # Connect to the database
+        con = get_db_connection()
+        cur = con.cursor()
         con = get_db_connection()
         cur = con.cursor()
         # Fetch all the job descriptions from the database
@@ -71,8 +89,6 @@ def index():
         if form_type == 'login':
             username = request.form.get('username')
             password = request.form.get('password')
-            print("Username: ", username)
-            print("Password: ", password)
             con = get_db_connection()  
             cur = con.cursor()
             user = cur.execute('SELECT * FROM userdata WHERE username = ?', (username,)).fetchone()
@@ -84,7 +100,7 @@ def index():
                 userobj = User.get(user['id'])
                 login_user(userobj)
                 session['id'] = user['id']
-                session['username'] = request.form['username']
+                session['username'] = user['username']
                 
                 return redirect("/")
             else:
@@ -101,9 +117,8 @@ def index():
            
             con = get_db_connection()  
             cur = con.cursor()   
-            cur.execute("INSERT into userdata (username, hashed_password, nested_skills, soft_skills, hard_skills,  is_admin) values (?,?,?,?,?,?)",(name,hashed_password,'','','',0))  
+            cur.execute("INSERT into userdata (username, hashed_password,is_admin) values (?,?,?)",(name,hashed_password,0))  
             con.commit()
-
 
             cur.execute('SELECT id FROM userdata WHERE username = ?', (name,))  
             new_user_id = cur.fetchone()['id'] 
@@ -119,7 +134,6 @@ def index():
 
 @register_user_blueprint.route('/register',methods = ["POST","GET"])
 def index():
-    msg = "msg" 
     if request.method == "POST":
         if 'file' not in request.files:
             flash('No file part')
@@ -141,7 +155,7 @@ def index():
         con = get_db_connection()
         cur = con.cursor()
         userid = session['id']
-        cur.execute("UPDATE userdata SET feedback = ? WHERE id = ?", (feedback,userid,))
+        cur.execute("UPDATE userdata SET feedback = ? ,field_of_interest = ? WHERE id = ?", (feedback,foi,userid,))
         con.commit()
         ROOT_DIR = Path.cwd()
         metrics_file_path = ROOT_DIR / 'metrics.md'  # Path to the metrics.md file
@@ -170,7 +184,7 @@ def index():
 @logout_blueprint.route("/logout")
 def logout():
     logout_user()
-    session.pop("id", None)
+    session.pop("username", None)
     return redirect("/login")
 
 @admin_page_blueprint.route("/admindashboard")
@@ -216,7 +230,7 @@ def profile():
     else:
         if request.method == 'POST':
             form_type = request.form.get('form_type')
-            print("Form type: ", form_type)
+            
             
             # Handle file upload and process the CV (already correctly implemented)
             if 'file' not in request.files:

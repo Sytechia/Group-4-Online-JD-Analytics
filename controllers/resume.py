@@ -99,7 +99,6 @@ def extract_text_from_pdf_matthew(pdf_file_path):
 
         # Step 4: Convert text to lowercase
         text = text.lower()
-        print("Text extracted from PDF:", text)
     except Exception as e:
         print(f"Error extracting text: {e}")
 
@@ -130,8 +129,6 @@ def extract_keywords_from_metrics(file_path, resume_keywords, threshold=80):
     # Find all list items <li> which contain the skills and convert them to lowercase
     skills_list = [li.get_text(strip=True).lower() for li in soup.find_all('li')]
 
-    # Debugging: print the extracted skills list
-    # print(f"Extracted skills from metrics.md: {skills_list}")
 
     # Use fuzzy matching to include similar keywords
     similar_keywords = []
@@ -139,14 +136,9 @@ def extract_keywords_from_metrics(file_path, resume_keywords, threshold=80):
     for skill in skills_list:
         # Use fuzzywuzzy to find keywords in the resume that match the skill with a given threshold
         matches = process.extractBests(skill, resume_keywords, scorer=fuzz.ratio, score_cutoff=threshold)
-        # If there are matches, print them for debugging
-        if matches:
-            print(f"Matches for '{skill}' from resume_keywords: {matches}")
+        # If there are matches, append the matched keyword to the similar_keywords list
         for match in matches:
-            similar_keywords.append(match[0])  # Append matched keyword
-
-    # Debugging: print the similar keywords found by fuzzy matching
-    # print(f"Similar keywords found by fuzzywuzzy: {similar_keywords}")
+            similar_keywords.append(match[0])  
 
     # Combine skills_list and similar_keywords into one list
     combined_keywords = skills_list + similar_keywords
@@ -156,14 +148,10 @@ def extract_keywords_from_metrics(file_path, resume_keywords, threshold=80):
 
 # Step 4: Compare resume keywords with metrics.md keywords
 def compare_resume_to_metrics(resume_keywords, combined_keywords):
-    # Debugging: Print the list of combined keywords
-    # print(f"Combined Keywords (metrics and fuzzy matches): {combined_keywords}")
+
 
     # Step 4: Compare resume keywords with combined keywords
     matching_keywords = [word for word in resume_keywords if word in combined_keywords]
-
-    # Debugging: Print the matching keywords found
-    print(f"Matching Keywords from resume: {matching_keywords}")
 
     return matching_keywords
 
