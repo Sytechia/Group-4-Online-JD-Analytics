@@ -36,7 +36,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function 
 
-@home_blueprint.route('/')
+@home_blueprint.route('/', methods=['GET'])
 def index():
     if 'username' not in session:
         return redirect('/login')
@@ -60,17 +60,25 @@ def index():
         # Connect to the database
         con = get_db_connection()
         cur = con.cursor()
-        con = get_db_connection()
-        cur = con.cursor()
+        query = "SELECT * FROM jobdesc"
+        filters = []
+
+        levels = request.args.getlist('level')
+        print(f'Filtered Levels {levels}')
+        if levels:
+            query += " WHERE job_position_level IN ({})".format(','.join('?' for _ in levels))
+            filters = levels
+
         # Fetch all the job descriptions from the database
-        cur.execute("SELECT * FROM jobdesc")
-        rows = cur.fetchall()
+        rows = con.execute(query, filters).fetchall()
+
         # Fetch the 10 most recent job descriptions from the database
         cur.execute("SELECT job_title, job_detail_url,job_listed,job_description, company_name, company_location FROM jobdesc order by job_listed asc limit 10")
         recent_10_rows = cur.fetchall()
         # Fetch the 10 most recent job descriptions from the database that contain the word 'data'
         cur.execute("SELECT job_title, job_detail_url,job_listed,job_description, company_name, company_location FROM jobdesc where job_title LIKE '%data%' order by job_listed asc limit 10")
         top_10_rows = cur.fetchall()
+
         # Commit the changes and close the connection
         con.close()
         
@@ -80,13 +88,14 @@ def index():
             user = session
             print(f'Logged in as {user["username"]}')
 
-        return render_template('home.html',user = user,rows=rows,recent_10_rows =recent_10_rows,top_10_rows = top_10_rows)
+        return render_template('home.html',user = user, rows = rows, selected_levels = levels, recent_10_rows = recent_10_rows, top_10_rows = top_10_rows)
 
 @login_blueprint.route('/login',methods = ["POST","GET"])
 def index():
     if request.method == 'POST':
         form_type = request.form.get('form_type')
         if form_type == 'login':
+            # Handles Login
             username = request.form.get('username')
             password = request.form.get('password')
             con = get_db_connection()  
@@ -101,11 +110,13 @@ def index():
                 login_user(userobj)
                 session['id'] = user['id']
                 session['username'] = user['username']
+                session['is_admin'] = user['is_admin']
                 
                 return redirect("/")
             else:
                 return render_template("login.html", message="Invalid username or password.")
         else:
+            # Handles Register
             name = request.form.get("name")  
             password = request.form.get("password1")
             password2 = request.form.get("password2")
@@ -114,10 +125,13 @@ def index():
                 return render_template("login.html", msg = "All fields are required.")  
 
             hashed_password = generate_password_hash(password)
-           
+
+            # Demo Purpose
+            is_admin = 1
+
             con = get_db_connection()  
             cur = con.cursor()   
-            cur.execute("INSERT into userdata (username, hashed_password,is_admin) values (?,?,?)",(name,hashed_password,0))  
+            cur.execute("INSERT into userdata (username, hashed_password,is_admin) values (?,?,?)",(name,hashed_password,is_admin))  
             con.commit()
 
             cur.execute('SELECT id FROM userdata WHERE username = ?', (name,))  
@@ -127,6 +141,7 @@ def index():
             login_user(userobj)
             session['id'] = new_user_id
             session['username'] = name
+            session['is_admin'] = is_admin
             con.close()
             return redirect("/register")
     else:
@@ -185,6 +200,7 @@ def index():
 def logout():
     logout_user()
     session.pop("username", None)
+    session.pop("is_admin", None)
     return redirect("/login")
 
 @admin_page_blueprint.route("/admindashboard")
