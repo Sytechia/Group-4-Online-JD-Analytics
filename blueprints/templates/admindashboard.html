@@ -1,45 +1,111 @@
 {% extends 'base.html' %}
 {% block header %}
-<nav>
-    <ul>
-      <li><a class="btn active" href="/">Home</a></li>
-      <li><a href="/login">Login</a></li>
-      <li><a href="/register">Register</a></li>
-      <li><a href="/logout">Logout</a></li>
-      <li style="float:right"><a href="/profile">Profile</a></li>
-    </ul>
-</nav>
-  <br>
-  <h1>{% block title %}Admin Dashboard Page{% endblock %}</h1><br><br>
-    <table border="1">
-      <thead>
-          <tr>
-              <th>ID</th>
-              <th>Username</th>
-              <th>Is Admin</th>
-              <th>Actions</th>
-          </tr>
-      </thead>
-      <tbody>
-      {% for user in users %}
-          <tr>
-              <td>{{ user.id }}</td>
-              <td>{{ user.username }}</td>
-              <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
-              <td>
-                  {% if not user.is_admin %}
-                  <a href="/admindashboard/make_admin/{{ user.id }}">Make Admin</a>
-                  {% endif %}
-                  <a href = "/admindashboard/delete/{{ user.id }}" onclick="return confirm('Are you sure?')">Delete</a>
-              </td>
-          </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-<br><br>  
+    {% include "navbar.html" %}
+    <style>
+        /* Global Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e3e3e3;
+            color: #c4c3ca;
+        }
 
-  {% endblock %}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #000;
+        }
+
+        a {
+            text-decoration: none;
+            color: #c74747;
+        }
+
+        a:hover {
+            color: #000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #2a2b38;
+            color: #c4c3ca;
+        }
+
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #c74747;
+            text-align: left;
+        }
+
+        th {
+            background-color: #c74747;
+            color: #000;
+        }
+
+        td {
+            background-color: #2a2b38;
+            color: #c4c3ca;
+            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
+        }
+
+        .action-btn {
+            background-color: #c74747;
+            color: #000;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background-color: #000;
+            color: #c74747;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Admin</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
+                        <td>
+                            <div class="admin-actions">
+                                {% if not user.is_admin %}
+                                    <a class="action-btn" href="/admindashboard/make_admin/{{ user.id }}">Make Admin</a>
+                                {% endif %}
+                                <a class="action-btn" href="/admindashboard/delete/{{ user.id }}" onclick="return confirm('Are you sure?')">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

@@ -20,6 +20,12 @@
         <a class="nav-link" href="/login">Login</a>
       </li>
       {% endif %}
+      {% if session.get('is_admin') %}
+      <!-- If session username is present and is an admin, show Admin -->
+      <li class="nav-item">
+        <a class="nav-link" href="/admindashboard">Admin</a>
+      </li>
+      {% endif %}
     </ul>
   </div>
 </nav>

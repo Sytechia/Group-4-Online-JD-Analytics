@@ -1,76 +1,387 @@
 {% extends 'base.html' %}
 {% block header %}
-{% include "navbar.html" %}
-  <br>
-  <h1>{% block title %}Home Page{% endblock %}</h1><br><br>
-  <div>
-    <h3>Employee Information</h3>  
-    <table border=5>  
-        <thead>  
-            <td>id</td>  
-            <td>job_id</td>  
-            <td>job_title</td>  
-            <td>job_detail_url</td>  
-            <td>job_listed</td>  
-            <td>company_name</td>  
-            <td>company_link</td>  
-            <td>company_location</td>  
-        </thead>  
-    
-        {% for row in rows %}  
-           
-            <tr>  
-                <td>{{row["id"]}}</td>  
-                <td>{{row["job_id"]}}</td>  
-                <td>{{row["job_title"]}}</td>  
-                <td>{{row["job_detail_url"]}}</td>  
-                <td>{{row["job_listed"]}}</td>  
-                <td>{{row["company_name"]}}</td>  
-                <td>{{row["company_link"]}}</td>  
-                <td>{{row["company_location"]}}</td>  
-            </tr>  
-    
-        {% endfor %}  
-      </div>
-  <h1>Recent 10 Job Listings</h1>
-  <div class="scroll-container">
-    {% for recent_10_row in recent_10_rows %}
-    <div class="tile">
-        <div>
-            <h3><a href="{{ recent_10_row[1] }}" target="_blank">{{ recent_10_row[0] }}</a></h3>
-            <p>{{ recent_10_row[3] }}</p>
-        </div>
-        <div class="tile-info">
-            <p>Location: {{ recent_10_row[4] }}</p>
-            <p>Date Listed: {{ recent_10_row[2] }}</p>
-        </div>
-    </div>
-    {% endfor %}
-  </div>
-  <br><br>
-    <h1>Top 10 Listings Related to Interest</h1>
-    <h1>Welcome {{user['username']}} !</h1>
-  <div class="scroll-container">
-    {% for top_10_row in top_10_rows %}
-    <div class="tile">
-        <div>
-            <h3><a href="{{ top_10_row[1] }}" target="_blank">{{ top_10_row[0] }}</a></h3>
-            <p>{{ top_10_row[3] }}</p>
-        </div>
-        <div class="tile-info">
-            <p>Location: {{ top_10_row[4] }}</p>
-            <p>Date Listed: {{ top_10_row[2] }}</p>
-        </div>
-    </div>
-    {% endfor %}
-  </div> 
-</table>  
-<br><br>  
+    {% include "navbar.html" %}
+    <style>
+        /* Global Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e3e3e3;
+            color: #c4c3ca;
+        }
 
-  {% endblock %}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-{% block content %}
+        h1, h2 {
+            font-size: 24px;
+            color: #000;
+        }
+
+        a {
+            text-decoration: none;
+            color: #c74747;
+        }
+
+        a:hover {
+            color: #000;
+        }
+
+        /* Adjust for Navbar */
+        .content {
+            margin-top: 10px; /* Moves content down to avoid navbar overlap */
+        }
+
+        /* Search Bar */
+        .search-bar {
+            /* background-color: #000; */
+            background-color: #2a2b38;
+            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #c4c3ca;
+            border-radius: 5px;
+            background-color: #e3e3e3;
+            color: #000;
+        }
+
+        .search-bar button {
+            width: 20%;
+            padding: 10px;
+            background-color: #c74747;
+            border: none;
+            color: #000;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .search-bar button:hover {
+            background-color: #000;
+            color: #c74747;
+        }
+
+        /* Sidebar Filters */
+        .job-listings {
+            display: flex;
+        }
+
+        .filters {
+            width: 25%;
+            /* background-color: #000; */
+            background-color: #2a2b38;
+            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
+            padding: 15px;
+            border-radius: 5px;
+            margin-right: 20px;
+            color: #c74747;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-section h3 {
+            font-size: 18px;
+            color: #e3e3e3;
+            margin-bottom: 10px;
+        }
+
+        .filter-section ul {
+            list-style-type: none;
+            padding: 0;
+            background: rgba(255, 255, 255, 0);
+        }
+
+        .filter-section ul li {
+            margin-bottom: 10px;
+            display: flex; /* Use flex here to align the checkbox and label properly */
+            align-items: center;
+            flex-direction: row; /* Ensures label stays beside checkbox */
+            justify-content: flex-start; /* Align items to the start of the row */
+            width: 100%; /* Make sure the list item spans the full width */
+        }
+
+        .filter-section input {
+            margin-right: 10px;
+            display: inline-block; /* Ensure input and label remain on the same line */
+        }
+
+
+        /* Job Listings */
+        .job-cards {
+            width: 75%;
+        }
+
+        .job-card {
+            /* background-color: #000; */
+            background-color: #2a2b38;
+            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            transition: box-shadow 0.2s ease;
+            color: #c74747;
+
+            /* width: 300px; */
+            height: 200px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* .job-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: #c74747;
+            color: #000;
+        } */
+
+        .job-info {
+            flex: 1;
+        }
+
+        .job-info h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #c74747;
+        }
+
+        .job-info p {
+            margin: 5px 0;
+            color: #c4c3ca;
+        }
+
+        .job-action {
+            text-align: right;
+        }
+
+        .job-action button {
+            background-color: #c74747;
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .job-action button:hover {
+            background-color: #000;
+            color: #c74747;
+        }
+    </style>
+
 
 {% endblock %}
+
+{% block title %}Home Page{% endblock %}
+
+{% block content %}
+    <div class="container content">
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <input type="text" placeholder="Search for jobs" />
+            <button type="submit">Search</button>
+        </div>
+
+        <!-- Job Listings with Filters -->
+        <div class="job-listings">
+            <!-- Filters Section -->
+            <div class="filters">
+              <!-- Category Filter -->
+              <!-- <div class="filter-section">
+                  <h3>Category</h3>
+                  <ul>
+                      <li>
+                          <input type="checkbox" id="admin" />
+                          <label for="admin">Admin/HR</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="sales" />
+                          <label for="sales">Sales</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="engineering" />
+                          <label for="engineering">Engineering</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="it" />
+                          <label for="it">IT</label>
+                      </li>
+                  </ul>
+              </div> -->
+          
+              <!-- Job Type Filter -->
+              <div class="filter-section">
+                  <h3>Job Type</h3>
+                  <ul>
+                      <li>
+                          <input type="checkbox" id="full-time" />
+                          <label for="full-time">Full-Time</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="part-time" />
+                          <label for="part-time">Part-Time</label>
+                      </li>
+                  </ul>
+              </div>
+
+              <!-- Job Experience Level Filter -->
+              <div class="filter-section">
+                <form id="filterForm" method="get">
+                  <h3>Experience Level</Leg></h3>
+                  <ul>
+                      <li>
+                          <input type="checkbox" id="Internship" name="level" value="Internship"
+                          {% if 'Internship' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                          <label for="Internship">Internship</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="Entry-level" name="level" value="Entry level"
+                          {% if 'Entry level' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                          <label for="Entry-level">Entry level</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="Associate" name="level" value="Associate"
+                          {% if 'Associate' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                          <label for="Associate">Associate</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="Mid-Senior-level" name="level" value="Mid-Senior level"
+                          {% if 'Mid-Senior level' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                          <label for="Mid-Senior-level">Mid-Senior level</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="Director" name="Director" value="Director"
+                          {% if 'Director' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                          <label for="Director">Director</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="Executive" name="level" value="Executive"
+                          {% if 'Executive' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                          <label for="Executive">Executive</label>
+                      </li>
+                  </ul>
+                </form>
+              </div>
+          
+              <!-- Job Function Filter -->
+              <div class="filter-section">
+                  <h3>Job Function</h3>
+                  <ul>
+                      <li>
+                          <input type="checkbox" id="management" />
+                          <label for="management">Management</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="support" />
+                          <label for="support">Support</label>
+                      </li>
+                      <li>
+                          <input type="checkbox" id="development" />
+                          <label for="development">Development</label>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+          
+          <!-- Job Cards Section -->
+          <div class="job-cards">
+                {% if not selected_levels %}
+                    <h2>Recent 10 Job Listings</h2>
+                    {% for recent_10_row in recent_10_rows %}
+                    <div class="job-card">
+                        <div class="job-info">
+                            <h3>{{ recent_10_row["job_title"] }}</h3>
+                            <p>{{ recent_10_row["job_description"] }}</p>
+                            <p>Company: {{ recent_10_row["company_name"] }}</p>
+                            <p>Date Listed: {{ recent_10_row["job_listed"] }}</p>
+                        </div>
+                        <div class="job-action">
+                            <a href="{{ recent_10_row['job_detail_url'] }}"target="_blank">
+                                <button type="button">Apply</button>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <h2>Top 10 Listings Related to Interest</h2>
+                    <!-- <h1>Welcome {{ user['username'] }}!</h1> -->
+                    {% for top_10_row in top_10_rows %}
+                    <div class="job-card">
+                        <div class="job-info">
+                            <h3>{{ top_10_row["job_title"] }}</a></h3>
+                            <p>{{ top_10_row["job_description"] }}</p>
+                            <p>Company: {{ top_10_row["company_name"] }}</p>
+                            <p>Date Listed: {{ top_10_row["job_listed"] }}</p>
+                        </div>
+                        <div class="job-action">         
+                            <a href="{{ top_10_row['job_detail_url'] }}" target="_blank">
+                                <button type="button">Apply</button>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                <h2>All Jobs</h2>
+                <!-- <h1>Welcome {{ user['username'] }}!</h1> -->
+                {% if rows %}
+                    {% for row in rows %}
+                        <div class="job-card">
+                            <div class="job-info">
+                                <h3>{{ row["job_title"] }}</a></h3>
+                                <p>{{ row["job_description"] }}</p>
+                                <p>Company: {{ row["company_name"] }}</p>
+                                <p>Date Listed: {{ row["job_listed"] }}</p>
+                            </div>
+                            <div class="job-action">
+                                <a href="{{ row['job_detail_url'] }}" target="_blank">
+                                    <button type="button">Apply</button>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No jobs found for the selected levels.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function submitForm() {
+            document.getElementById('filterForm').submit();
+        }
+        document.querySelectorAll('.job-card').forEach(button => {
+            button.addEventListener('click', () => {
+                const jobCard = button;
+                const jobDescription = jobCard;
+
+                if (jobDescription.style.height === '200px') {
+                    jobDescription.style.whiteSpace = 'wrap';
+                    jobDescription.style.height = 'auto';
+                } else {
+                    jobDescription.style.whiteSpace = 'wrap';
+                    jobDescription.style.height = '200px';
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block footer %}
 {% endblock %}

@@ -27,7 +27,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+login_manager.login_view = '/login'
 subprocess.run('python -m spacy download en_core_web_md', shell=True, check=True)
 nltk.download('punkt')
 nltk.download('stopwords')
