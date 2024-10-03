@@ -49,7 +49,7 @@ def get_cv_feedback(cv_text,foi):
     """
     
     response = openai.chat.completions.create(
-        model="gpt-4",  # Ensure this is a valid model name
+        model="gpt-4o-mini",  # Ensure this is a valid model name
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
@@ -71,8 +71,15 @@ def process_cv(file_path, filename,foi):
 
     # Get feedback from OpenAI
     feedback = get_cv_feedback(cv_text,foi)
+    feedback = format_feedback(feedback)
     return (f'{feedback}')
 
+def format_feedback(feedback):
+    # Replace ### with <li>
+    feedback = re.sub(r'###', '<li>', feedback)
+    # Replace ** with <b>
+    feedback = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', feedback)
+    return feedback
 
 #<-----------------Matthew Codes Start ------------------------>
 def extract_text_from_pdf_matthew(pdf_file_path):

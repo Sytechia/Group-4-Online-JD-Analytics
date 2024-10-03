@@ -6,7 +6,7 @@ from controllers.skill_diagram import check_metrics_for_plot, hard_skills, soft_
 
 
 import os
-from controllers.resume import allowed_file, process_cv
+from controllers.resume import allowed_file, process_cv, format_feedback
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
@@ -271,8 +271,6 @@ def make_admin(user_id):
 def profile():
     if request.method == 'POST':
         form_type = request.form.get('form_type')
-        
-        
         # Handle file upload and process the CV (already correctly implemented)
         if 'file' not in request.files:
             flash('No file part')
@@ -294,20 +292,20 @@ def profile():
             cur = con.cursor()
             userid = session['id']
             cur.execute('SELECT field_of_interest FROM userdata WHERE id = ?', (userid,))  
-            foi = cur.fetchone()['id'] 
+            foi = cur.fetchone()['field_of_interest'] 
             feedback = str(process_cv(file_path, filename,foi))
+            feedback = format_feedback(feedback)
             cur.execute("UPDATE userdata SET feedback = ? WHERE id = ?", (feedback,userid,))
             con.commit()
-            cur.execute("SELECT id,username FROM userdata WHERE id = ?", (userid,))
-            rows = cur.fetchall()
             con.close()
         
             # Fetch soft and hard skills from the database
             soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
             if  soft_skills_list == [] or hard_skills_list == []:
-                return render_template('profile.html', rows=rows)
+                return render_template('profile.html' ,feedback=feedback)
             else :
-                return render_template('profile.html', rows=rows, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+                return render_template('profile.html', feedback=feedback,soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+        
         elif form_type == 'update_user_skills':
             # Example usage in your function:
             ROOT_DIR = Path.cwd()
@@ -330,32 +328,32 @@ def profile():
             userid = session['id']
             insert_resume_text(userid, stored_text)
             con = get_db_connection()
+            cur.execute("UPDATE userdata SET nested_skills = ? WHERE id = ?", (stored_text,userid,))
             cur = con.cursor()
-            cur.execute("SELECT id,username FROM userdata WHERE id = ?", (userid,))
-            rows = cur.fetchall()
+            feedback = cur.fetchone()['feedback'] 
             con.close()
         
             # Fetch soft and hard skills from the database
             soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
             if  soft_skills_list == [] or hard_skills_list == []:
-                return render_template('profile.html', rows=rows)
+                return render_template('profile.html', feedback=feedback)
             else :
-                return render_template('profile.html', rows=rows, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+                return render_template('profile.html',feedback=feedback, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
 
     else:
         userid = session['id']
         con = get_db_connection()
         cur = con.cursor()
-        cur.execute("SELECT id,username,feedback FROM userdata WHERE id = ?", (userid,))
-        rows = cur.fetchall()
+        cur.execute("SELECT feedback FROM userdata WHERE id = ?", (userid,))
+        feedback = cur.fetchone()['feedback'] 
         con.close()
         
         # Fetch soft and hard skills from the database
         soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
         if  soft_skills_list == [] or hard_skills_list == []:
-            return render_template('profile.html', rows=rows)
+            return render_template('profile.html',feedback=feedback)
         else :
-            return render_template('profile.html', rows=rows, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+            return render_template('profile.html', feedback=feedback, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
 
 # Route for generating the hard skills plot
 @profile_page_blueprint.route('/plot.png')
