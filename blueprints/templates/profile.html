@@ -2,88 +2,135 @@
 
 {% block header %}
 {% include "navbar.html" %}
+<style>
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    
+    .column {
+        flex: 1;
+        padding: 50px;
+        width: 50%;
+    }
+
+    /* Media query for smaller screens */
+    @media screen and (max-width: 600px) {
+        .column {
+            flex: 100%;
+        }
+    }
+
+    /* Ensure images and forms are responsive */
+    img, form {
+        width: 100%;
+    }
+
+    /* Add some margin to separate elements */
+    .column img, .column form {
+        margin-top: 20px;
+    }
+
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .box {
+        flex: 1 1 45%; /* Adjust the width to fit 2 boxes per row */
+        margin: 10px;
+        padding: 20px;
+        background-color: #f0f0f0; /* Example background color */
+        text-align: center; /* Center the text inside the box */
+    }
+
+    /* Media query for smaller screens */
+    @media screen and (max-width: 800px) {
+        .box {
+            flex: 1 1 100%; /* Stack boxes vertically on small screens */
+        }
+    }
+
+</style>
 <br>
-<h1>{% block title %}Profile Page{% endblock %}</h1>
-<table border=5>  
-    <thead>  
-        <td>ID</td>    
-        <td>Username</td>
-        <td>Feedback</td>  
+<center><h1 > {{session['username']}}'s Profile Page </h1></center>
+
+<table border=5 style="width:100%;">  
+    <thead>     
+        <td style="font-weight:bold ;text-align: center;">{{session['username']}}'s CV Feedback</td>
     </thead>  
-       
-    {% for row in rows %}  
-        <tr>  
-            <td>{{row["id"]}}</td>  
-            <td>{{row["username"]}}</td>
-            <td>{{row["feedback"] | replace('\n', '<br>')|safe}}</td>    
-        </tr>  
-    {% endfor %}  
+        <tr>   
+            <td>{{feedback | replace('\n', '<br>')|  safe}}</td>    
+        </tr>    
 </table> 
 {% endblock %}
 
 {% block content %}
+<br>
 <center><h2>Skills Representation</h2></center>
 <br>
-<div class="row" >
-    <div class="column">
+<div class="container" >
+    <div class="box">
         <h3>Hard Skills</h3>
         {% if hard_skills_list %}
+        <div class="image-container">
             <img src="{{ url_for('profile.plot') }}" alt="Hard Skills Plot">
+        </div>
         {% else %}
             <p>No Hard Skills data available.</p>
         {% endif %}
     </div>
-    <div class="column">
+    <div class="box">
         <h3>Soft Skills</h3>
         {% if soft_skills_list %}
+        <div class="image-container">
             <img src="{{ url_for('profile.plot_soft_skills') }}" alt="Soft Skills Plot">
+        </div>
         {% else %}
             <p>No Soft Skills data available.</p>
         {% endif %}
     </div>
-</div>
-<br><br><br><br><br><br><br>
-<div class="row" >
-<div class="column">
-<h1>Upload your CV for New Feedback</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="form_type" value="get_feedback">
-        <input type="file" name="file" accept=".pdf, .docx" required>
-        <button type="submit">Upload</button>
-    </form>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-</div>
-
-<!-- New form for additional request -->
-<div class="column">
-<h1>Update User's Skills</h1>
-    <form method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="form_type" value="update_user_skills">
-            <label for="Resume-File" >File Upload*</label>
-            <input type="file" name="file" accept=".pdf, .docx" required>
-            <label for="highest_education_obtained" >Highest Education Obtained*<span class="tooltip-element" tooltip="Degree">?</span></label>
-            <select name="highest_education_obtained" id="highest_education_obtained" required="required" aria-required="true">
-            <option value="diploma" selected="true" id="highest_education_obtained-0">Diploma</option>
-            <option value="advance_diploma" id="highest_education_obtained-1">Advance Diploma</option>
-            <option value="bachelors_degree" id="highest_education_obtained-2">Bachelor's Degree</option>
-            <option value="master_degree" id="highest_education_obtained-3">Master's Degree</option>
-            <option value="phd" id="highest_education_obtained-4">Phd</option>
-            </select>
-            <label for="number_of_hours" >Number of Hours in the Field of Interest *<span class="tooltip-element" tooltip="0 - 10000 HRS">?</span></label>
-            <input type="text" placeholder="1234" name="number_of_hours" access="false" id="number_of_hours" title="0 - 10000 HRS" required="required" aria-required="true">
-            <label for="certification_number" >Number of Certification in the Field of Interest.<span class="tooltip-element" tooltip="Example: User ABC has AWS Cloud Practitioner and ECC CEH.  User has 2 certifications, hence the input will be 2">?</span></label>
-            <input type="text" placeholder="1" name="certification_number" access="false" id="certification_number" title="Example: User ABC has AWS Cloud Practitioner and ECC CEH.  User has 2 certifications, hence the input will be 2" required="required" aria-required="true">
- 
+    <div class="box">
+    <h1>Upload your CV for New Feedback</h1><br>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="form_type" value="get_feedback">
+            <input type="file" name="file" accept=".pdf, .docx" required><br><br>
             <button type="submit">Upload</button>
-    </form>
+        </form>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+    <div class="box">
+    <h1>Update User's Skills</h1><br>
+        <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="form_type" value="update_user_skills">
+                <label for="Resume-File" >File Upload*</label> 
+                <input type="file" name="file" accept=".pdf, .docx" required> <br>
+                <label for="highest_education_obtained" >Highest Education Obtained*<span class="tooltip-element" tooltip="Degree">?</span></label>
+                <select name="highest_education_obtained" id="highest_education_obtained" required="required" aria-required="true">
+                <option value="diploma" selected="true" id="highest_education_obtained-0">Diploma</option>
+                <option value="advance_diploma" id="highest_education_obtained-1">Advance Diploma</option>
+                <option value="bachelors_degree" id="highest_education_obtained-2">Bachelor's Degree</option>
+                <option value="master_degree" id="highest_education_obtained-3">Master's Degree</option>
+                <option value="phd" id="highest_education_obtained-4">Phd</option>
+                </select><br>
+                <label for="number_of_hours" >Number of Hours in the Field of Interest *<span class="tooltip-element" tooltip="0 - 10000 HRS">?</span></label>
+                <input type="text" placeholder="1234" name="number_of_hours" access="false" id="number_of_hours" title="0 - 10000 HRS" required="required" aria-required="true"><br>
+                <label for="certification_number" >Number of Certification in the Field of Interest.<span class="tooltip-element" tooltip="Example: User ABC has AWS Cloud Practitioner and ECC CEH.  User has 2 certifications, hence the input will be 2">?</span></label>
+                <input type="text" placeholder="1" name="certification_number" access="false" id="certification_number" title="Example: User ABC has AWS Cloud Practitioner and ECC CEH.  User has 2 certifications, hence the input will be 2" required="required" aria-required="true"><br>
+    
+                <br><button type="submit">Upload</button>
+        </form>
+    </div>
 </div>
         {% with messages = get_flashed_messages() %}
             {% if messages %}

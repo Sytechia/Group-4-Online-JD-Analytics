@@ -137,7 +137,6 @@ li a:hover {
 }
 
 .active {
-    background-color: #04AA6D;
     background-color: #c74747;
 }
 /* Create two equal columns that floats next to each other */
@@ -179,10 +178,13 @@ nav ul li a {
 nav ul li a:hover {
     background-color: #575757;
 }
-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 20px; /* Increase padding to make the footer thicker */
-    height: 90px; /* Set a specific height if needed */
+button{
+    width: 20%;
+            padding: 10px;
+            background-color: #c74747;
+            border: none;
+            color: #000;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
 }
