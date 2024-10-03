@@ -89,6 +89,34 @@ def index():
             print(f'Logged in as {user["username"]}')
 
         return render_template('home.html',user = user, rows = rows, selected_levels = levels, recent_10_rows = recent_10_rows, top_10_rows = top_10_rows)
+    
+@home_blueprint.route('/search_suggestions', methods=['GET'])
+def search_suggestions():
+    query = request.args.get('query', '')  # Get the query from the AJAX request
+    print(f'Search query: {query}')  # Debug: Check the query being passed in
+
+    if query:
+        suggestions = get_search_suggestions(query)  # Query the database for matching items
+        print(f'Suggestions: {suggestions}')  # Debug: Check what suggestions are returned
+    else:
+        suggestions = []
+
+    return jsonify(suggestions)  # Return the results as JSON
+
+def get_search_suggestions(query):
+    con = get_db_connection()  # Connect to your SQLite or other database
+    cur = con.cursor()
+
+    # Query the database (adjust this based on your schema)
+    cur.execute("SELECT job_title FROM jobdesc WHERE job_title LIKE ? COLLATE NOCASE", ('%' + query + '%',))
+    results = cur.fetchall()
+    
+    print(f'Database results: {results}')  # Debug: Check the actual results fetched from the DB
+
+    con.close()
+
+    # Return a list of matching results
+    return [result[0] for result in results]
 
 @login_blueprint.route('/login',methods = ["POST","GET"])
 def index():
