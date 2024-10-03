@@ -108,34 +108,37 @@ button:hover {
     background-color: #0056b3;
 }
 
-/* CSS for navbar*/
+CSS for navbar
 ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
     overflow: hidden;
     background-color: #333;
-  }
+    background-color: #2a2b38;
+    background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
+}
   
-  li {
+li {
     float: left;
-  }
+}
   
-  li a {
+li a {
     display: block;
     color: white;
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
-  }
+}
   
-  /* Change the link color to #111 (black) on hover */
-  li a:hover {
+/* Change the link color to #111 (black) on hover */
+li a:hover {
     background-color: #111;
-  }
+}
 
 .active {
-background-color: #04AA6D;
+    background-color: #04AA6D;
+    background-color: #c74747;
 }
 /* Create two equal columns that floats next to each other */
 .column {
@@ -146,12 +149,12 @@ background-color: #04AA6D;
   }
   
   /* Clear floats after the columns */
-  .row:after {
+.row:after {
     content: "";
     display: table;
     clear: both;
-  }
-  nav {
+}
+nav {
     position: fixed;
     top: 0;
     width: 100%;
