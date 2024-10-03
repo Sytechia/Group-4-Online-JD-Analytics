@@ -3,16 +3,14 @@
 {% block header %}
 {% include "navbar.html" %}
 <br>
-<h1>{% block title %}Register Page{% endblock %}</h1>
-<center>
-  <h1>Update User's Skills</h1>
-  <form method="POST" enctype="multipart/form-data">
+<div style="text-align: center;">
+  <h1>Update User's Skills</h1><br>
+  <form method="POST" enctype="multipart/form-data" style="display: inline-block; text-align: left;">
     <label for="foi">Field of Interest.<span class="tooltip-element"
         tooltip="Example: Software Engineer/ Network Engineer">?</span></label>
-    <input type="text" placeholder="Cybersercurity Analyst" name="foi" access="false" id="foi"
-      title="Example: Software Engineer/ Network Engineer" required="required" aria-required="true">
+    <input type="text" placeholder="Cybersercurity Analyst" name="foi" access="false" id="foi" title="Example: Software Engineer/ Network Engineer" required="required" aria-required="true"> <br><br>
     <label for="Resume-File">File Upload*</label>
-    <input type="file" name="file" accept=".pdf, .docx" required>
+    <input type="file" name="file" accept=".pdf, .docx" required><br><br>
     <label for="highest_education_obtained">Highest Education Obtained*<span class="tooltip-element"
         tooltip="Degree">?</span></label>
     <select name="highest_education_obtained" id="highest_education_obtained" required="required" aria-required="true">
@@ -21,19 +19,17 @@
       <option value="bachelors_degree" id="highest_education_obtained-2">Bachelor's Degree</option>
       <option value="master_degree" id="highest_education_obtained-3">Master's Degree</option>
       <option value="phd" id="highest_education_obtained-4">Phd</option>
-    </select>
+    </select><br><br>
     <label for="number_of_hours">Number of Hours of experience the Field of Interest *<span class="tooltip-element"
         tooltip="0 - 10000 HRS">?</span></label>
-    <input type="text" placeholder="1234" name="number_of_hours" access="false" id="number_of_hours"
-      title="0 - 10000 HRS" required="required" aria-required="true">
+    <input type="text" placeholder="1234" name="number_of_hours" access="false" id="number_of_hours"title="0 - 10000 HRS" required="required" aria-required="true"> <br><br>
     <label for="certification_number">Number of Certification in the Field of Interest.<span class="tooltip-element"
         tooltip="Example: User ABC has AWS Cloud Practitioner and ECC CEH.  User has 2 certifications, hence the input will be 2">?</span></label>
-    <input type="text" placeholder="1" name="certification_number" access="false" id="certification_number"
-      title="Example: User ABC has AWS Cloud Practitioner and ECC CEH.  User has 2 certifications, hence the input will be 2"
-      required="required" aria-required="true">
+    <input type="text" placeholder="1" name="certification_number" access="false" id="certification_number" title="Example: User ABC has AWS Cloud Practitioner and ECC CEH.  User has 2 certifications, hence the input will be 2" required="required" aria-required="true"><br><br>
     <button type="submit">Upload</button>
   </form>
-</center>
+</div>
+<br>
 {% endblock %}
 
 {% block content %}
