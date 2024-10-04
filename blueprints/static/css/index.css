@@ -3,10 +3,13 @@
     padding: 0;
     box-sizing: border-box;
 }
-html, body {
+
+html,
+body {
     height: 100%;
     overflow: hidden;
 }
+
 body {
     font-family: Arial, sans-serif;
     justify-content: center;
@@ -18,12 +21,15 @@ body {
     flex-direction: column;
     min-height: 100vh;
     overflow-y: auto;
-}.scroll-container {
+}
+
+.scroll-container {
     display: flex;
     overflow-x: auto;
     white-space: nowrap;
     padding: 20px;
 }
+
 .tile {
     flex: 0 0 auto;
     width: 300px;
@@ -39,6 +45,7 @@ body {
     text-align: center;
     padding: 10px;
 }
+
 .tile a {
     color: white;
     text-decoration: none;
@@ -48,9 +55,11 @@ body {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
 .tile a:hover {
     text-decoration: underline;
 }
+
 .tile-info {
     font-size: 0.9em;
 }
@@ -63,10 +72,12 @@ body {
     padding: 15px;
     margin-bottom: 20px;
 }
+
 .message-container {
     display: flex;
     margin-bottom: 10px;
 }
+
 .message {
     display: inline-block;
     background-color: #e6e6e6;
@@ -75,17 +86,21 @@ body {
     max-width: 70%;
     word-wrap: break-word;
 }
+
 .message-container.user {
     justify-content: flex-end;
 }
+
 .message-container.user .message {
     background-color: #007bff;
     color: white;
 }
+
 .chat-input {
     display: flex;
     padding: 10px 0;
 }
+
 #user-input {
     flex-grow: 1;
     padding: 12px;
@@ -93,6 +108,7 @@ body {
     border-radius: 20px;
     font-size: 16px;
 }
+
 button {
     padding: 12px 24px;
     background-color: #007bff;
@@ -103,24 +119,17 @@ button {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s;
-
-    background-color: #c74747;
-    color: #000;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
 }
+
 button:hover {
-    /* background-color: #0056b3; */
-    background-color: #000;
-    color: #c74747;
+    background-color: #0056b3;
 }
 
 /*CSS for navbar*/
 .active {
     background-color: #c74747;
 }
+
 /* Create two equal columns that floats next to each other */
 .column {
     float: left;
@@ -128,8 +137,8 @@ button:hover {
     padding: 10px;
     height: 300px; /* Should be removed. Only for demonstration */
   }
-  
-  /* Clear floats after the columns */
+
+/* Clear floats after the columns */
 .row:after {
     content: "";
     display: table;
@@ -143,29 +152,107 @@ nav {
     color: white;
     z-index: 1000;
 }
+
 nav ul {
     list-style-type: none;
     padding: 0;
 }
+
 nav ul li {
     display: inline;
     margin-right: 10px;
 }
+
 nav ul li a {
     color: white;
     text-decoration: none;
     padding: 14px 20px;
     display: inline-block;
 }
+
 nav ul li a:hover {
     background-color: #575757;
 }
-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 20px; /* Increase padding to make the footer thicker */
-    height: 90px; /* Set a specific height if needed */
+
+
+/* Style the search box inside the navigation bar */
+.nav[type=text] {
+    float: right;
+    padding: 6px;
+    border: none;
+    margin-top: 8px;
+    margin-right: 16px;
+    font-size: 17px;
+}
+
+/* Ensure the container uses flexbox for proper layout */
+.navbar .container-fluid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Ensure the <ul> spans full width */
+.navbar-nav {
+    flex-grow: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Center the search bar and give it a fixed width */
+.navbar-nav .search-bar {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+}
+
+/* Adjust the input field and button widths */
+.navbar-nav .search-bar .form-control {
+    width: 250px;
+    /* Adjust this width as needed */
+    margin-right: 10px;
+}
+
+.navbar-nav .search-bar .btn {
+    white-space: nowrap;
+}
+
+.suggestion-box {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 300px;  /* Match the width of your input */
+    z-index: 999;
+    display: none;  /* Hidden by default, shown when suggestions are available */
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    color: black;
+}
+
+.suggestion-item:hover {
+    background-color: #f1f1f1;
+}
+
+/* Search bar custom styling */
+#search-input {
+    width: 300px;
+}
+button{
+    width: 20%;
+            padding: 10px;
+            background-color: #c74747;
+            border: none;
+            color: #000;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+
 }
 
 .flashes {
