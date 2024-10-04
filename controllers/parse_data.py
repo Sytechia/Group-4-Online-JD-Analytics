@@ -12,10 +12,8 @@ def parse_job(response, cursor, conn):
     soup = BeautifulSoup(response.body, 'html.parser')
     jobs = soup.find_all("div", class_="base-card")
     print(f"Found {len(jobs)} jobs")
-    # print(soup.prettify())
 
     for job in jobs:
-
         job_item = {
             'job_id': None,
             'original_job_title': None,
@@ -45,7 +43,8 @@ def parse_job(response, cursor, conn):
                 continue
 
             if job_id_exists(cursor, job_item['job_id']):
-                print(f"Job ID {job_item['job_id']} already exists: {job_item['job_detail_url']}")
+                #Check if any updates are needed
+                update_existing_job(cursor, conn, job_item)
                 continue
 
             job_title_tag = job.find("h3", class_="base-search-card__title")
@@ -113,6 +112,33 @@ def job_id_exists(cursor, job_id):
     cursor.execute('SELECT 1 FROM jobdesc WHERE job_id = ?', (job_id,))
     return cursor.fetchone() is not None
 
+def update_existing_job(cursor, conn, job_item):
+    cursor.execute('SELECT * FROM jobdesc WHERE job_id = ?', (job_item['job_id'],))
+    existing_job = cursor.fetchone()
+
+    if not existing_job:
+        print(f"Job ID {job_item['job_id']} not found in the database.")
+        return
+
+    updates = []
+    update_values = []
+
+    for key, value in job_item.items():
+        if value and value != existing_job[key]:
+            updates.append(f"{key} = ?")
+            update_values.append(value)
+
+    if not updates:
+        print(f"No updates required for Job ID {job_item['job_id']}.")
+        return
+
+    if updates:
+        update_values.append(job_item['job_id'])
+        update_query = f"UPDATE jobdesc SET {', '.join(updates)} WHERE job_id = ?"
+        cursor.execute(update_query, update_values)
+        conn.commit()
+        print(f"Updated job: {job_item['job_detail_url']}")
+
 def get_job_description(job_description_soup):
     if job_description_soup is None:
         return "Could not retrieve Job Description due to rate limiting"
@@ -148,7 +174,7 @@ def get_job_position_level(job_position_level_soup,job_description):
                 return job_position_level
             else:
                 prompt = (f"Based on the {job_description} job description, what is the seniority level of the job? You have to choose from the following options: "
-                          f"Entry level, Associate, Mid-Senior level, Director, Executive."
+                          f"Internship, Entry level, Associate, Mid-Senior level, Director, Executive."
                           f"Please choose the most appropriate option and only return the selected option.")
 
                 openai.api_key = openai_api_key
@@ -214,6 +240,8 @@ def extract_job_position(job_title):
     # Extract the text response
     job_position = response.choices[0].message.content.strip()
     return job_position
+
+
 
 
 
