@@ -1,5 +1,8 @@
 from flask import Blueprint, render_template, request, jsonify, flash, send_file, flash, redirect, current_app, session
 import sys
+
+from nltk import sent_tokenize
+
 from secret_key import client
 from controllers.db_connections import get_db_connection
 from controllers.skill_diagram import check_metrics_for_plot, hard_skills, soft_skills,calculate_score
@@ -15,6 +18,7 @@ from functools import wraps
 
 from controllers.resume import  compare_resume_to_metrics, extract_keywords_from_metrics, preprocess_text, insert_resume_text, extract_text_from_pdf_matthew
 from pathlib import Path
+import bleach
 
 
 home_blueprint = Blueprint('home', __name__)
@@ -88,7 +92,9 @@ def index():
             user = session
             print(f'Logged in as {user["username"]}')
 
-        return render_template('home.html',user = user, rows = rows, selected_levels = levels, recent_10_rows = recent_10_rows, top_10_rows = top_10_rows)
+        return render_template('home.html', user = user, rows = rows, selected_levels = levels, recent_10_rows = recent_10_rows, top_10_rows = top_10_rows)
+
+
     
 @home_blueprint.route('/search_suggestions', methods=['GET'])
 def search_suggestions():
