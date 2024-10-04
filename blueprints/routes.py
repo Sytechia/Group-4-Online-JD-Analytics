@@ -156,6 +156,7 @@ def index():
 
             # Demo Purpose
             is_admin = 1
+            is_admin = 0
 
             con = get_db_connection()  
             cur = con.cursor()   
