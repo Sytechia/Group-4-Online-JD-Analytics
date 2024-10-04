@@ -3,13 +3,10 @@
     padding: 0;
     box-sizing: border-box;
 }
-
-html,
-body {
+html, body {
     height: 100%;
     overflow: hidden;
 }
-
 body {
     font-family: Arial, sans-serif;
     justify-content: center;
@@ -21,15 +18,12 @@ body {
     flex-direction: column;
     min-height: 100vh;
     overflow-y: auto;
-}
-
-.scroll-container {
+}.scroll-container {
     display: flex;
     overflow-x: auto;
     white-space: nowrap;
     padding: 20px;
 }
-
 .tile {
     flex: 0 0 auto;
     width: 300px;
@@ -45,7 +39,6 @@ body {
     text-align: center;
     padding: 10px;
 }
-
 .tile a {
     color: white;
     text-decoration: none;
@@ -55,11 +48,9 @@ body {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-
 .tile a:hover {
     text-decoration: underline;
 }
-
 .tile-info {
     font-size: 0.9em;
 }
@@ -72,12 +63,10 @@ body {
     padding: 15px;
     margin-bottom: 20px;
 }
-
 .message-container {
     display: flex;
     margin-bottom: 10px;
 }
-
 .message {
     display: inline-block;
     background-color: #e6e6e6;
@@ -86,21 +75,17 @@ body {
     max-width: 70%;
     word-wrap: break-word;
 }
-
 .message-container.user {
     justify-content: flex-end;
 }
-
 .message-container.user .message {
     background-color: #007bff;
     color: white;
 }
-
 .chat-input {
     display: flex;
     padding: 10px 0;
 }
-
 #user-input {
     flex-grow: 1;
     padding: 12px;
@@ -108,7 +93,6 @@ body {
     border-radius: 20px;
     font-size: 16px;
 }
-
 button {
     padding: 12px 24px;
     background-color: #007bff;
@@ -120,7 +104,6 @@ button {
     font-size: 16px;
     transition: background-color 0.3s;
 }
-
 button:hover {
     background-color: #0056b3;
 }
@@ -132,12 +115,14 @@ ul {
     padding: 0;
     overflow: hidden;
     background-color: #333;
+    background-color: #2a2b38;
+    background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
 }
-
+  
 li {
     float: left;
 }
-
+  
 li a {
     display: block;
     color: white;
@@ -145,15 +130,16 @@ li a {
     padding: 14px 16px;
     text-decoration: none;
 }
+  
 /* Change the link color to #111 (black) on hover */
 li a:hover {
     background-color: #111;
 }
 
 .active {
+    background-color: #04AA6D;
     background-color: #c74747;
 }
-
 /* Create two equal columns that floats next to each other */
 .column {
     float: left;
@@ -161,8 +147,8 @@ li a:hover {
     padding: 10px;
     height: 300px; /* Should be removed. Only for demonstration */
   }
-
-/* Clear floats after the columns */
+  
+  /* Clear floats after the columns */
 .row:after {
     content: "";
     display: table;
@@ -176,105 +162,60 @@ nav {
     color: white;
     z-index: 1000;
 }
-
 nav ul {
     list-style-type: none;
     padding: 0;
 }
-
 nav ul li {
     display: inline;
     margin-right: 10px;
 }
-
 nav ul li a {
     color: white;
     text-decoration: none;
     padding: 14px 20px;
     display: inline-block;
 }
-
 nav ul li a:hover {
     background-color: #575757;
 }
-
-
-/* Style the search box inside the navigation bar */
-.nav[type=text] {
-    float: right;
-    padding: 6px;
-    border: none;
-    margin-top: 8px;
-    margin-right: 16px;
-    font-size: 17px;
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 20px; /* Increase padding to make the footer thicker */
+    height: 90px; /* Set a specific height if needed */
 }
 
-/* Ensure the container uses flexbox for proper layout */
-.navbar .container-fluid {
+.flashes {
+    list-style-type: none;
+    padding: 0;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: center; /* Center horizontally */
+    position: fixed;
+    top: 10px; /* Adjust as needed */
+    width: 100%;
+    z-index: 1000; /* Ensure it appears above other content */
 }
-
-/* Ensure the <ul> spans full width */
-.navbar-nav {
-    flex-grow: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Center the search bar and give it a fixed width */
-.navbar-nav .search-bar {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-}
-
-/* Adjust the input field and button widths */
-.navbar-nav .search-bar .form-control {
-    width: 250px;
-    /* Adjust this width as needed */
-    margin-right: 10px;
-}
-
-.navbar-nav .search-bar .btn {
-    white-space: nowrap;
-}
-
-.suggestion-box {
-    position: absolute;
-    background-color: white;
-    border: 1px solid #ddd;
-    max-height: 200px;
-    overflow-y: auto;
-    width: 300px;  /* Match the width of your input */
-    z-index: 999;
-    display: none;  /* Hidden by default, shown when suggestions are available */
-}
-
-.suggestion-item {
+.flashes li {
     padding: 10px;
-    cursor: pointer;
-    color: black;
+    margin: 5px;
+    border-radius: 5px;
+    max-width: 80%; /* Adjust as needed */
 }
-
-.suggestion-item:hover {
-    background-color: #f1f1f1;
+.flashes .success {
+    background-color: #d4edda;
+    color: #155724;
 }
-
-/* Search bar custom styling */
-#search-input {
-    width: 300px;
+.flashes .info {
+    background-color: #d1ecf1;
+    color: #0c5460;
 }
-button{
-    width: 20%;
-            padding: 10px;
-            background-color: #c74747;
-            border: none;
-            color: #000;
-            border-radius: 5px;
-            margin-left: 10px;
-            cursor: pointer;
-
+.flashes .warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.flashes .danger {
+    background-color: #f8d7da;
+    color: #721c24;
 }
