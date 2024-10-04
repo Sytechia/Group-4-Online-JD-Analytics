@@ -153,6 +153,10 @@
 
         .job-info {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevents overflowing content */
+            padding: 5px;
         }
 
         .job-info h3 {
@@ -304,7 +308,7 @@
                 {% if not selected_levels %}
                     <h2>Recent 10 Job Listings</h2>
                     {% for recent_10_row in recent_10_rows %}
-                    <div class="job-card">
+                    <div class="job-card" style="height: 200px;">
                         <div class="job-info">
                             <h3>{{ recent_10_row["job_title"] }}</h3>
                             <p>{{ recent_10_row["job_description"] }}</p>
@@ -322,7 +326,7 @@
                     <h2>Top 10 Listings Related to Interest</h2>
                     <!-- <h1>Welcome {{ user['username'] }}!</h1> -->
                     {% for top_10_row in top_10_rows %}
-                    <div class="job-card">
+                    <div class="job-card" style="height: 200px;">
                         <div class="job-info">
                             <h3>{{ top_10_row["job_title"] }}</a></h3>
                             <p>{{ top_10_row["job_description"] }}</p>
@@ -341,7 +345,7 @@
                 <!-- <h1>Welcome {{ user['username'] }}!</h1> -->
                 {% if rows %}
                     {% for row in rows %}
-                        <div class="job-card">
+                        <div class="job-card" style="height: 200px;">
                             <div class="job-info">
                                 <h3>{{ row["job_title"] }}</a></h3>
                                 <p>{{ row["job_description"] }}</p>
@@ -369,14 +373,11 @@
         document.querySelectorAll('.job-card').forEach(button => {
             button.addEventListener('click', () => {
                 const jobCard = button;
-                const jobDescription = jobCard;
-
-                if (jobDescription.style.height === '200px') {
-                    jobDescription.style.whiteSpace = 'wrap';
-                    jobDescription.style.height = 'auto';
+                
+                if (jobCard.style.height === '200px') {
+                    jobCard.style.height = 'auto';
                 } else {
-                    jobDescription.style.whiteSpace = 'wrap';
-                    jobDescription.style.height = '200px';
+                    jobCard.style.height = '200px';
                 }
             });
         });
