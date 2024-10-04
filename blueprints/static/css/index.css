@@ -103,9 +103,18 @@ button {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s;
+
+    background-color: #c74747;
+    color: #000;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
 }
 button:hover {
-    background-color: #0056b3;
+    /* background-color: #0056b3; */
+    background-color: #000;
+    color: #c74747;
 }
 
 CSS for navbar
@@ -137,7 +146,6 @@ li a:hover {
 }
 
 .active {
-    background-color: #04AA6D;
     background-color: #c74747;
 }
 /* Create two equal columns that floats next to each other */
