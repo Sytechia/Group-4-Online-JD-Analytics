@@ -160,7 +160,8 @@ def index():
                 
                 return redirect("/")
             else:
-                return render_template("login.html", message="Invalid username or password.")
+                flash('User does not exist or wrong password', 'danger')
+                return render_template("login.html")
         else:
             # Handles Register
             name = request.form.get("name")  
@@ -168,8 +169,12 @@ def index():
             password2 = request.form.get("password2")
 
             if not (name and password and password2):
-                return render_template("login.html", msg = "All fields are required.")  
-
+                flash('All fields are required.', 'danger')
+                return render_template("login.html")  
+            if password != password2:
+                flash('Password do not match.', 'danger')
+                return render_template("login.html") 
+            
             hashed_password = generate_password_hash(password)
 
             # Demo Purpose
