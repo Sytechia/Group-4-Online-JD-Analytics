@@ -1,6 +1,8 @@
 # parse_data.py
 import re
 import sqlite3
+
+import bleach
 import openai
 from bs4 import BeautifulSoup
 import requests
@@ -82,7 +84,9 @@ def parse_job(response, cursor, conn):
 
             get_job_description_soup, job_position_level_soup = fetch_job_details(job_item['job_detail_url'])
 
+
             job_item['job_description'] = get_job_description(get_job_description_soup)
+
             job_item['job_position_level'] = get_job_position_level(job_position_level_soup,job_item['job_description'])
 
 
@@ -144,21 +148,49 @@ def get_job_description(job_description_soup):
         return "Could not retrieve Job Description due to rate limiting"
 
     if job_description_soup:
-        # Remove unwanted elements
-        for element in job_description_soup.find_all(['span', 'a']):
-            element.decompose()
+        #unwrap elements
+        for element in job_description_soup.find_all(['span']):
+            element.unwrap()
 
-        # Replace bullet points
-        for ul in job_description_soup.find_all('ul'):
-            for li in ul.find_all('li'):
-                li.insert(0, '-')
+        # Remove unwanted strings
+        unwanted_strings = ['Show less', 'Show more']
+        for unwanted in unwanted_strings:
+            for elem in job_description_soup(text=lambda text: text and unwanted in text):
+                elem.extract()
 
-        text = job_description_soup.get_text(separator='\n').strip()
-        text = text.replace('\n\n', '')
-        text = text.replace('::marker', '-')
-        text = text.replace('-\n', '- ')
-        text = text.replace('Show less', '').replace('Show more', '')
-        return text
+        print(f"Job Description: {job_description_soup}")
+        print(f"Job Description Prettified!!!!!!!!!: {job_description_soup.prettify()}")
+
+        # # Get the cleaned HTML content
+        html_content = str(job_description_soup.prettify())
+
+        print(f"html_content: {html_content}")
+
+        # Sanitize the HTML to prevent XSS attacks
+        allowed_tags = [
+            'p', 'ul', 'ol', 'li', 'strong', 'br', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'blockquote', 'code', 'pre', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+            'a', 'b', 'i', 'u', 'span', 'div'
+        ]
+        allowed_attributes = {
+            'a': ['href', 'title'],
+            'img': ['src', 'alt', 'title'],
+            '*': ['style']  # Allow style attribute if needed
+        }
+
+        clean_html = bleach.clean(
+            html_content,
+            tags=allowed_tags,
+            attributes=allowed_attributes,
+            strip=True
+        )
+        soup = BeautifulSoup(clean_html, 'html.parser')
+        clean_html = soup.prettify()
+
+        print(f"clean_html: {clean_html}")
+
+        return clean_html
+
     else:
         return "Could not find Job Description"
 
