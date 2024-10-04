@@ -3,7 +3,7 @@ import sys
 from secret_key import client
 from controllers.db_connections import get_db_connection
 from controllers.skill_diagram import check_metrics_for_plot, hard_skills, soft_skills,calculate_score
-
+from controllers.crawler import JobSpider
 
 import os
 from controllers.resume import allowed_file, process_cv, format_feedback
@@ -64,13 +64,24 @@ def index():
         filters = []
 
         levels = request.args.getlist('level')
-        print(f'Filtered Levels {levels}')
-        if levels:
-            query += " WHERE job_position_level IN ({})".format(','.join('?' for _ in levels))
-            filters = levels
+        selected_titles = request.args.getlist('job_title')
 
-        # Fetch all the job descriptions from the database
-        rows = con.execute(query, filters).fetchall()
+        query = "SELECT * FROM jobdesc WHERE 1=1"
+        params = []
+
+        print(f'Filtered Levels {levels}')
+        print(f'selected titles {selected_titles}')
+
+        if selected_titles:
+            title_filters = " OR ".join("job_title LIKE ?" for _ in selected_titles)
+            query += " AND (" + title_filters + ")"
+            params.extend(['%' + title + '%' for title in selected_titles])  # Wrap titles with wildcards for partial matching
+
+        if levels:
+            query += " AND job_position_level IN ({})".format(','.join('?' for _ in levels))
+            params.extend(levels)
+
+        rows = con.execute(query, params).fetchall()
 
         # Fetch the 10 most recent job descriptions from the database
         cur.execute("SELECT job_title, job_detail_url,job_listed,job_description, company_name, company_location FROM jobdesc order by job_listed asc limit 10")
@@ -78,6 +89,9 @@ def index():
         # Fetch the 10 most recent job descriptions from the database that contain the word 'data'
         cur.execute("SELECT job_title, job_detail_url,job_listed,job_description, company_name, company_location FROM jobdesc where job_title LIKE '%data%' order by job_listed asc limit 10")
         top_10_rows = cur.fetchall()
+
+        # Fetch all the job titles from JobSpider Class
+        job_titles = JobSpider.get_job_titles()
 
         # Commit the changes and close the connection
         con.close()
@@ -88,7 +102,7 @@ def index():
             user = session
             print(f'Logged in as {user["username"]}')
 
-        return render_template('home.html',user = user, rows = rows, selected_levels = levels, recent_10_rows = recent_10_rows, top_10_rows = top_10_rows)
+        return render_template('home.html',user = user, rows = rows, selected_titles=selected_titles, selected_levels = levels, recent_10_rows = recent_10_rows, top_10_rows = top_10_rows, job_titles = job_titles)
     
 @home_blueprint.route('/search_suggestions', methods=['GET'])
 def search_suggestions():
@@ -155,7 +169,6 @@ def index():
             hashed_password = generate_password_hash(password)
 
             # Demo Purpose
-            is_admin = 1
             is_admin = 0
 
             con = get_db_connection()  

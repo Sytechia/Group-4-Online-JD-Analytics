@@ -55,6 +55,10 @@ class JobSpider(scrapy.Spider):
         elif failure.check(TimeoutError, TCPTimedOutError):
             request = failure.request
             self.logger.error('TimeoutError on %s', request.url)
+            
+    @classmethod
+    def get_job_titles(cls):
+        return cls.job_titles
 
 if __name__ == "__main__":
     process = CrawlerProcess()

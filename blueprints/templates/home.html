@@ -205,107 +205,64 @@
         <!-- Job Listings with Filters -->
         <div class="job-listings">
             <!-- Filters Section -->
-            <div class="filters">
-              <!-- Category Filter -->
-              <!-- <div class="filter-section">
-                  <h3>Category</h3>
-                  <ul>
-                      <li>
-                          <input type="checkbox" id="admin" />
-                          <label for="admin">Admin/HR</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="sales" />
-                          <label for="sales">Sales</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="engineering" />
-                          <label for="engineering">Engineering</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="it" />
-                          <label for="it">IT</label>
-                      </li>
-                  </ul>
-              </div> -->
-          
-              <!-- Job Type Filter -->
-              <div class="filter-section">
-                  <h3>Job Type</h3>
-                  <ul>
-                      <li>
-                          <input type="checkbox" id="full-time" />
-                          <label for="full-time">Full-Time</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="part-time" />
-                          <label for="part-time">Part-Time</label>
-                      </li>
-                  </ul>
-              </div>
-
+            <div class="filters">  
               <!-- Job Experience Level Filter -->
-              <div class="filter-section">
-                <form id="filterForm" method="get">
-                  <h3>Experience Level</Leg></h3>
-                  <ul>
-                      <li>
-                          <input type="checkbox" id="Internship" name="level" value="Internship"
-                          {% if 'Internship' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                          <label for="Internship">Internship</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="Entry-level" name="level" value="Entry level"
-                          {% if 'Entry level' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                          <label for="Entry-level">Entry level</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="Associate" name="level" value="Associate"
-                          {% if 'Associate' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                          <label for="Associate">Associate</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="Mid-Senior-level" name="level" value="Mid-Senior level"
-                          {% if 'Mid-Senior level' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                          <label for="Mid-Senior-level">Mid-Senior level</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="Director" name="Director" value="Director"
-                          {% if 'Director' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                          <label for="Director">Director</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="Executive" name="level" value="Executive"
-                          {% if 'Executive' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                          <label for="Executive">Executive</label>
-                      </li>
-                  </ul>
-                </form>
-              </div>
-          
-              <!-- Job Function Filter -->
-              <div class="filter-section">
-                  <h3>Job Function</h3>
-                  <ul>
-                      <li>
-                          <input type="checkbox" id="management" />
-                          <label for="management">Management</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="support" />
-                          <label for="support">Support</label>
-                      </li>
-                      <li>
-                          <input type="checkbox" id="development" />
-                          <label for="development">Development</label>
-                      </li>
-                  </ul>
-              </div>
-          </div>
+              <form id="filterForm" method="get">
+                    <div class="filter-section">
+                    <h3>Experience Level</Leg></h3>
+                    <ul>
+                        <li>
+                            <input type="checkbox" id="Internship" name="level" value="Internship"
+                            {% if 'Internship' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                            <label for="Internship">Internship</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="Entry-level" name="level" value="Entry level"
+                            {% if 'Entry level' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                            <label for="Entry-level">Entry level</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="Associate" name="level" value="Associate"
+                            {% if 'Associate' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                            <label for="Associate">Associate</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="Mid-Senior-level" name="level" value="Mid-Senior level"
+                            {% if 'Mid-Senior level' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                            <label for="Mid-Senior-level">Mid-Senior level</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="Director" name="level" value="Director"
+                            {% if 'Director' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                            <label for="Director">Director</label>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="Executive" name="level" value="Executive"
+                            {% if 'Executive' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                            <label for="Executive">Executive</label>
+                        </li>
+                    </ul>
+                    </div>
+                    
+                    <!-- Job Function Filter -->
+                    <div class="filter-section">
+                        <h3>Job Function</h3>
+                        <ul>
+                            {% for job_title in job_titles %}
+                            <li>
+                                <input type="checkbox" id="{{ job_title | replace(' ', '_') }}" name="job_title" value="{{ job_title }}"
+                                {% if job_title in selected_titles %}checked{% endif %} onchange="submitForm()"/>
+                                <label for="{{ job_title | replace(' ', '_') }}">{{ job_title }}</label>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </form> 
+            </div>
           
           <!-- Job Cards Section -->
           <div class="job-cards">
-                {% if not selected_levels %}
+                {% if not selected_levels and not selected_titles%}
                     <h2>Recent 10 Job Listings</h2>
                     {% for recent_10_row in recent_10_rows %}
                     <div class="job-card" style="height: 200px;">
@@ -342,7 +299,6 @@
                     {% endfor %}
                 {% endif %}
                 <h2>All Jobs</h2>
-                <!-- <h1>Welcome {{ user['username'] }}!</h1> -->
                 {% if rows %}
                     {% for row in rows %}
                         <div class="job-card" style="height: 200px;">
@@ -373,7 +329,7 @@
         document.querySelectorAll('.job-card').forEach(button => {
             button.addEventListener('click', () => {
                 const jobCard = button;
-                
+
                 if (jobCard.style.height === '200px') {
                     jobCard.style.height = 'auto';
                 } else {
