@@ -77,7 +77,7 @@
         }
 
         .filters {
-            width: 25%;
+
             /* background-color: #000; */
             background-color: #2a2b38;
             background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
@@ -119,9 +119,7 @@
 
 
         /* Job Listings */
-        .job-cards {
-            width: 75%;
-        }
+
 
         .job-card {
             /* background-color: #000; */
@@ -170,9 +168,7 @@
             color: #c4c3ca;
         }
 
-        .job-action {
-            text-align: right;
-        }
+
 
         .job-action button {
             background-color: #c74747;
@@ -181,6 +177,7 @@
             padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
+            width: 90%;
         }
 
         .job-action button:hover {
@@ -268,7 +265,8 @@
                     <div class="job-card" style="height: 200px;">
                         <div class="job-info">
                             <h3>{{ recent_10_row["job_title"] }}</h3>
-                            <p>{{ recent_10_row["job_description"] }}</p>
+                            <p>{{ recent_10_row["job_description"] | safe}}</p>
+                            <br>
                             <p>Company: {{ recent_10_row["company_name"] }}</p>
                             <p>Date Listed: {{ recent_10_row["job_listed"] }}</p>
                         </div>
@@ -285,12 +283,13 @@
                     {% for top_10_row in top_10_rows %}
                     <div class="job-card" style="height: 200px;">
                         <div class="job-info">
-                            <h3>{{ top_10_row["job_title"] }}</a></h3>
-                            <p>{{ top_10_row["job_description"] }}</p>
+                            <h3>{{ top_10_row["job_title"] }}</h3>
+                            <p>{{ top_10_row["job_description"] | safe }}</p>
+                            <br>
                             <p>Company: {{ top_10_row["company_name"] }}</p>
                             <p>Date Listed: {{ top_10_row["job_listed"] }}</p>
                         </div>
-                        <div class="job-action">         
+                        <div class="job-action">
                             <a href="{{ top_10_row['job_detail_url'] }}" target="_blank">
                                 <button type="button">Apply</button>
                             </a>
@@ -303,8 +302,9 @@
                     {% for row in rows %}
                         <div class="job-card" style="height: 200px;">
                             <div class="job-info">
-                                <h3>{{ row["job_title"] }}</a></h3>
-                                <p>{{ row["job_description"] }}</p>
+                                <h3>{{ row["job_title"] }}</h3>
+                                <p>{{ row["job_description"] | safe }}</p>
+                                <br>
                                 <p>Company: {{ row["company_name"] }}</p>
                                 <p>Date Listed: {{ row["job_listed"] }}</p>
                             </div>
