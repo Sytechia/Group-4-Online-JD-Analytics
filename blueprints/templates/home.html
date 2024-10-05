@@ -1,192 +1,222 @@
 {% extends 'base.html' %}
 {% block header %}
-    {% include "navbar.html" %}
-    <style>
-        /* Global Styling */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #e3e3e3;
-            color: #c4c3ca;
-        }
+{% include "navbar.html" %}
+<style>
+    /* Global Styling */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #e3e3e3;
+        color: #c4c3ca;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
-        h1, h2 {
-            font-size: 24px;
-            color: #000;
-        }
+    h1,
+    h2 {
+        font-size: 24px;
+        color: #000;
+    }
 
-        a {
-            text-decoration: none;
-            color: #c74747;
-        }
+    a {
+        text-decoration: none;
+        color: #c74747;
+    }
 
-        a:hover {
-            color: #000;
-        }
+    a:hover {
+        color: #000;
+    }
 
-        /* Adjust for Navbar */
-        .content {
-            margin-top: 10px; /* Moves content down to avoid navbar overlap */
-        }
+    /* Adjust for Navbar */
+    .content {
+        margin-top: 10px;
+        /* Moves content down to avoid navbar overlap */
+    }
 
-        /* Search Bar */
-        .search-bar {
-            /* background-color: #000; */
-            background-color: #2a2b38;
-            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
-            padding: 10px;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+    /* Search Bar */
+    .search-bar {
+        /* background-color: #000; */
+        background-color: #2a2b38;
+        background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
+        padding: 10px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+    }
 
-        .search-bar input[type="text"] {
-            width: 80%;
-            padding: 10px;
-            border: 1px solid #c4c3ca;
-            border-radius: 5px;
-            background-color: #e3e3e3;
-            color: #000;
-        }
+    .search-bar input[type="text"] {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #c4c3ca;
+        border-radius: 5px;
+        background-color: #e3e3e3;
+        color: #000;
+    }
 
-        .search-bar button {
-            width: 20%;
-            padding: 10px;
-            background-color: #c74747;
-            border: none;
-            color: #000;
-            border-radius: 5px;
-            margin-left: 10px;
-            cursor: pointer;
-        }
+    .search-bar button {
+        width: 20%;
+        padding: 10px;
+        background-color: #c74747;
+        border: none;
+        color: #000;
+        border-radius: 5px;
+        margin-left: 10px;
+        cursor: pointer;
+    }
 
-        .search-bar button:hover {
-            background-color: #000;
-            color: #c74747;
-        }
+    .search-bar button:hover {
+        background-color: #000;
+        color: #c74747;
+    }
 
-        /* Sidebar Filters */
-        .job-listings {
-            display: flex;
-        }
+    /* Sidebar Filters */
+    .job-listings {
+        display: flex;
+    }
 
-        .filters {
-            width: 25%;
-            /* background-color: #000; */
-            background-color: #2a2b38;
-            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
-            padding: 15px;
-            border-radius: 5px;
-            margin-right: 20px;
-            color: #c74747;
-        }
+    .filters {
+        width: 25%;
+        /* background-color: #000; */
+        background-color: #2a2b38;
+        background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
+        padding: 15px;
+        border-radius: 5px;
+        margin-right: 20px;
+        color: #c74747;
+    }
 
-        .filter-section {
-            margin-bottom: 20px;
-        }
+    .filter-section {
+        margin-bottom: 20px;
+    }
 
-        .filter-section h3 {
-            font-size: 18px;
-            color: #e3e3e3;
-            margin-bottom: 10px;
-        }
+    .filter-section h3 {
+        font-size: 18px;
+        color: #e3e3e3;
+        margin-bottom: 10px;
+    }
 
-        .filter-section ul {
-            list-style-type: none;
-            padding: 0;
-            background: rgba(255, 255, 255, 0);
-        }
+    .filter-section ul {
+        list-style-type: none;
+        padding: 0;
+        background: rgba(255, 255, 255, 0);
+    }
 
-        .filter-section ul li {
-            margin-bottom: 10px;
-            display: flex; /* Use flex here to align the checkbox and label properly */
-            align-items: center;
-            flex-direction: row; /* Ensures label stays beside checkbox */
-            justify-content: flex-start; /* Align items to the start of the row */
-            width: 100%; /* Make sure the list item spans the full width */
-        }
+    .filter-section ul li {
+        margin-bottom: 10px;
+        display: flex;
+        /* Use flex here to align the checkbox and label properly */
+        align-items: center;
+        flex-direction: row;
+        /* Ensures label stays beside checkbox */
+        justify-content: flex-start;
+        /* Align items to the start of the row */
+        width: 100%;
+        /* Make sure the list item spans the full width */
+    }
 
-        .filter-section input {
-            margin-right: 10px;
-            display: inline-block; /* Ensure input and label remain on the same line */
-        }
-
-
-        /* Job Listings */
-        .job-cards {
-            width: 75%;
-        }
-
-        .job-card {
-            /* background-color: #000; */
-            background-color: #2a2b38;
-            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            transition: box-shadow 0.2s ease;
-            color: #c4c3ca;
-
-            /* width: 300px; */
-            height: 200px;
-            border: 1px solid #ccc;
-            padding: 10px;
-            overflow: hidden;
-            position: relative;
-            cursor: pointer;
-        }
-
-        .job-card:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            background-color: #484a61;
-            color: #000;
-        }
-
-        .job-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* Prevents overflowing content */
-            padding: 5px;
-        }
-
-        .job-info h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #c74747;
-        }
-
-        .job-info p {
-            margin: 5px 0;
-            color: #c4c3ca;
-        }
+    .filter-section input {
+        margin-right: 10px;
+        display: inline-block;
+        /* Ensure input and label remain on the same line */
+    }
 
 
+    /* Job Listings */
+    .job-cards {
+        width: 75%;
+    }
 
-        .job-action button {
-            background-color: #c74747;
-            color: #000;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 90%;
-        }
+    .job-card {
+        /* background-color: #000; */
+        background-color: #2a2b38;
+        background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        transition: box-shadow 0.2s ease;
+        color: #c4c3ca;
 
-        .job-action button:hover {
-            background-color: #000;
-            color: #c74747;
-        }
-    </style>
+        /* width: 300px; */
+        height: 200px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+    
+    }
+    
+    .job-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        background-color: #484a61;
+        color: #000;
+    }
+
+    .job-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Prevents overflowing content */
+        padding: 5px;
+    }
+
+    .job-info h3 {
+        margin: 0;
+        font-size: 18px;
+        color: #c74747;
+    }
+
+    .job-info {
+        margin: 5px 0;
+        color: #c4c3ca;
+    }
+
+
+
+    .job-action button {
+        background-color: #c74747;
+        color: #000;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 90%;
+    }
+
+    .job-action button:hover {
+        background-color: #000;
+        color: #c74747;
+    }
+
+    .suggestion-box {
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ddd;
+        max-height: 200px;
+        overflow-y: auto;
+        width: 300px;
+        /* Adjust to match input width */
+        z-index: 999;
+        display: none;
+        /* Hidden by default */
+    }
+
+    .suggestion-item {
+        padding: 10px;
+        cursor: pointer;
+        color: black;
+    }
+
+    .suggestion-item:hover {
+        background-color: #f1f1f1;
+    }
+</style>
 
 
 {% endblock %}
@@ -194,139 +224,177 @@
 {% block title %}Home Page{% endblock %}
 
 {% block content %}
-    <div class="container content">
-        <!-- Search Bar -->
-        <div class="search-bar">
-            <input type="text" placeholder="Search for jobs" />
-            <button type="submit">Search</button>
-        </div>
 
-        <!-- Job Listings with Filters -->
-        <div class="job-listings">
-            <!-- Filters Section -->
-            <div class="filters">  
-              <!-- Job Experience Level Filter -->
-              <form id="filterForm" method="get">
-                    <div class="filter-section">
-                    <h3>Experience Level</Leg></h3>
-                    <ul>
-                        <li>
-                            <input type="checkbox" id="Internship" name="level" value="Internship"
-                            {% if 'Internship' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                            <label for="Internship">Internship</label>
-                        </li>
-                        <li>
-                            <input type="checkbox" id="Entry-level" name="level" value="Entry level"
-                            {% if 'Entry level' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                            <label for="Entry-level">Entry level</label>
-                        </li>
-                        <li>
-                            <input type="checkbox" id="Associate" name="level" value="Associate"
-                            {% if 'Associate' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                            <label for="Associate">Associate</label>
-                        </li>
-                        <li>
-                            <input type="checkbox" id="Mid-Senior-level" name="level" value="Mid-Senior level"
-                            {% if 'Mid-Senior level' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                            <label for="Mid-Senior-level">Mid-Senior level</label>
-                        </li>
-                        <li>
-                            <input type="checkbox" id="Director" name="level" value="Director"
-                            {% if 'Director' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                            <label for="Director">Director</label>
-                        </li>
-                        <li>
-                            <input type="checkbox" id="Executive" name="level" value="Executive"
-                            {% if 'Executive' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
-                            <label for="Executive">Executive</label>
-                        </li>
-                    </ul>
-                    </div>
-                    
-                    <!-- Job Function Filter -->
-                    <div class="filter-section">
-                        <h3>Job Function</h3>
-                        <ul>
-                            {% for job_title in job_titles %}
-                            <li>
-                                <input type="checkbox" id="{{ job_title | replace(' ', '_') }}" name="job_title" value="{{ job_title }}"
-                                {% if job_title in selected_titles %}checked{% endif %} onchange="submitForm()"/>
-                                <label for="{{ job_title | replace(' ', '_') }}">{{ job_title }}</label>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </form> 
-            </div>
-          
-          <!-- Job Cards Section -->
-          <div class="job-cards">
-                {% if not selected_levels and not selected_titles%}
-                    <h2>Recent 10 Job Listings</h2>
-                    {% for recent_10_row in recent_10_rows %}
-                    <div class="job-card" style="height: 200px;">
-                        <div class="job-info">
-                            <h3>{{ recent_10_row["job_title"] }}</h3>
-                            <p>{{ recent_10_row["job_description"] | safe}}</p>
-                            <br>
-                            <p>Company: {{ recent_10_row["company_name"] }}</p>
-                            <p>Date Listed: {{ recent_10_row["job_listed"] }}</p>
-                        </div>
-                        <div class="job-action">
-                            <a href="{{ recent_10_row['job_detail_url'] }}"target="_blank">
-                                <button type="button">Apply</button>
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
-
-                    <h2>Top 10 Listings Related to Interest</h2>
-                    <!-- <h1>Welcome {{ user['username'] }}!</h1> -->
-                    {% for top_10_row in top_10_rows %}
-                    <div class="job-card" style="height: 200px;">
-                        <div class="job-info">
-                            <h3>{{ top_10_row["job_title"] }}</h3>
-                            <p>{{ top_10_row["job_description"] | safe }}</p>
-                            <br>
-                            <p>Company: {{ top_10_row["company_name"] }}</p>
-                            <p>Date Listed: {{ top_10_row["job_listed"] }}</p>
-                        </div>
-                        <div class="job-action">
-                            <a href="{{ top_10_row['job_detail_url'] }}" target="_blank">
-                                <button type="button">Apply</button>
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% endif %}
-                <h2>All Jobs</h2>
-                {% if rows %}
-                    {% for row in rows %}
-                        <div class="job-card" style="height: 200px;">
-                            <div class="job-info">
-                                <h3>{{ row["job_title"] }}</h3>
-                                <p>{{ row["job_description"] | safe }}</p>
-                                <br>
-                                <p>Company: {{ row["company_name"] }}</p>
-                                <p>Date Listed: {{ row["job_listed"] }}</p>
-                            </div>
-                            <div class="job-action">
-                                <a href="{{ row['job_detail_url'] }}" target="_blank">
-                                    <button type="button">Apply</button>
-                                </a>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <p>No jobs found for the selected levels.</p>
-                {% endif %}
-            </div>
-        </div>
+    
+<div class="container content">
+    <div class="search-bar">
+        <form id="search-form" action="/search" method="GET" style="display: flex; width: 100%;">
+            <input type="text" class="form-control me-2" id="search-input" placeholder="Search for jobs"
+                aria-label="Search" name="query" required />
+            <button type="submit" class="btn btn-outline-success">Search</button>
+        </form>
     </div>
 
-    <script>
-        function submitForm() {
-            document.getElementById('filterForm').submit();
+    <div id="suggestion-box" class="suggestion-box"></div>
+    <br>
+
+    <!-- Job Listings with Filters -->
+    <div class="job-listings">
+        <!-- Filters Section -->
+        <div class="filters">  
+            <!-- Job Experience Level Filter -->
+            <form id="filterForm" method="get">
+                <div class="filter-section">
+                <h3>Experience Level</Leg></h3>
+                <ul>
+                    <li>
+                        <input type="checkbox" id="Internship" name="level" value="Internship"
+                        {% if 'Internship' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                        <label for="Internship">Internship</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="Entry-level" name="level" value="Entry level"
+                        {% if 'Entry level' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                        <label for="Entry-level">Entry level</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="Associate" name="level" value="Associate"
+                        {% if 'Associate' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                        <label for="Associate">Associate</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="Mid-Senior-level" name="level" value="Mid-Senior level"
+                        {% if 'Mid-Senior level' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                        <label for="Mid-Senior-level">Mid-Senior level</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="Director" name="level" value="Director"
+                        {% if 'Director' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                        <label for="Director">Director</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="Executive" name="level" value="Executive"
+                        {% if 'Executive' in selected_levels %}checked{% endif %} onchange="submitForm()"/>
+                        <label for="Executive">Executive</label>
+                    </li>
+                </ul>
+                </div>
+                
+                <!-- Job Function Filter -->
+                <div class="filter-section">
+                    <h3>Job Function</h3>
+                    <ul>
+                        {% for job_title in job_titles %}
+                        <li>
+                            <input type="checkbox" id="{{ job_title | replace(' ', '_') }}" name="job_title" value="{{ job_title }}"
+                            {% if job_title in selected_titles %}checked{% endif %} onchange="submitForm()"/>
+                            <label for="{{ job_title | replace(' ', '_') }}">{{ job_title }}</label>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </form> 
+        </div>
+
+        <!-- Job Cards Section -->
+        <div class="job-cards">
+            {% if not selected_levels and not selected_titles%}
+                <h2>Recent 10 Job Listings</h2>
+                {% for recent_10_row in recent_10_rows %}
+                <div class="job-card" style="height: 200px;">
+                    <div class="job-info">
+                        <h3>{{ recent_10_row["job_title"] }}</h3>
+                        <p>{{ recent_10_row["job_description"] | safe}}</p>
+                        <br>
+                        <p>Company: {{ recent_10_row["company_name"] }}</p>
+                        <p>Date Listed: {{ recent_10_row["job_listed"] }}</p>
+                    </div>
+                    <div class="job-action">
+                        <a href="{{ recent_10_row['job_detail_url'] }}"target="_blank">
+                            <button type="button">Apply</button>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <h2>Top 10 Listings Related to Interest</h2>
+                <!-- <h1>Welcome {{ user['username'] }}!</h1> -->
+                {% for top_10_row in top_10_rows %}
+                <div class="job-card" style="height: 200px;">
+                    <div class="job-info">
+                        <h3>{{ top_10_row["job_title"] }}</h3>
+                        <p>{{ top_10_row["job_description"] | safe }}</p>
+                        <br>
+                        <p>Company: {{ top_10_row["company_name"] }}</p>
+                        <p>Date Listed: {{ top_10_row["job_listed"] }}</p>
+                    </div>
+                    <div class="job-action">
+                        <a href="{{ top_10_row['job_detail_url'] }}" target="_blank">
+                            <button type="button">Apply</button>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+            <h2>All Jobs</h2>
+            {% if rows %}
+                {% for row in rows %}
+                    <div class="job-card" style="height: 200px;">
+                        <div class="job-info">
+                            <h3>{{ row["job_title"] }}</h3>
+                            <p>{{ row["job_description"] | safe }}</p>
+                            <br>
+                            <p>Company: {{ row["company_name"] }}</p>
+                            <p>Date Listed: {{ row["job_listed"] }}</p>
+                        </div>
+                        <div class="job-action">
+                            <a href="{{ row['job_detail_url'] }}" target="_blank">
+                                <button type="button">Apply</button>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No jobs found for the selected levels.</p>
+            {% endif %}
+    </div>
+</div>
+<script>
+    function submitForm() {
+        document.getElementById('filterForm').submit();
+    }
+    document.querySelectorAll('.job-card').forEach(button => {
+        button.addEventListener('click', () => {
+            const jobCard = button;
+            const jobDescription = jobCard;
+
+            if (jobDescription.style.height === '200px') {
+                jobDescription.style.whiteSpace = 'wrap';
+                jobDescription.style.height = 'auto';
+            } else {
+                jobDescription.style.whiteSpace = 'wrap';
+                jobDescription.style.height = '200px';
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Search form elements
+        const searchInput = document.getElementById('search-input');
+        const suggestionBox = document.getElementById('suggestion-box');
+        const searchForm = document.getElementById('search-form');
+        const jobCardsContainer = document.getElementById('search-results');
+        const searchTitle = document.getElementById('search-title');
+
+        // Function to fetch suggestions from the backend
+        function fetchSuggestions(query) {
+            return fetch(`/search_suggestions?query=${query}`)
+                .then(response => response.json())  // Parse the JSON response
+                .then(data => data)  // Return the data (suggestions)
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                    return [];
+                });
         }
         document.querySelectorAll('.job-card').forEach(button => {
             button.addEventListener('click', () => {
@@ -339,7 +407,130 @@
                 }
             });
         });
-    </script>
+
+        // Event listener for typing in the search bar (suggestion box)
+        searchInput.addEventListener('input', function () {
+            const query = searchInput.value.trim();
+
+            if (query.length > 2) {  // Only fetch suggestions for input longer than 2 characters
+                fetchSuggestions(query).then(suggestions => {
+                    suggestionBox.innerHTML = '';  // Clear previous suggestions
+                    suggestionBox.style.display = 'block';  // Show the suggestion box
+
+                    if (suggestions.length > 0) {
+                        suggestions.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'suggestion-item';
+                            div.textContent = item;  // Add the suggestion text
+                            div.onclick = function () {
+                                searchInput.value = item;  // Set input value to clicked suggestion
+                                suggestionBox.innerHTML = '';  // Clear suggestions
+                                suggestionBox.style.display = 'none';  // Hide the suggestion box after selection
+                            };
+                            suggestionBox.appendChild(div);  // Append the suggestion to the suggestion box
+                        });
+                    } else {
+                        suggestionBox.innerHTML = '<div class="suggestion-item">No results found</div>';
+                    }
+                });
+            } else {
+                suggestionBox.innerHTML = '';  // Clear suggestions for short input
+                suggestionBox.style.display = 'none';  // Hide the suggestion box if input is too short
+            }
+        });
+
+        // Optional: Hide the suggestion box if clicked outside
+        document.addEventListener('click', function (e) {
+            if (!suggestionBox.contains(e.target) && !searchInput.contains(e.target)) {
+                suggestionBox.style.display = 'none';
+            }
+        });
+
+        // Function to add the click event listener to a job card for expanding/collapsing
+        function makeCardExpandable(card) {
+            card.addEventListener('click', () => {
+                // Check if the card is currently collapsed (height of 200px)
+                if (card.classList.contains('collapsed')) {
+                    // Expand the job card by setting height to the content's scrollHeight
+                    card.style.height = `${card.scrollHeight}px`;
+                    card.style.overflow = 'visible';  // Ensure all content is visible
+                    card.classList.remove('collapsed');
+                } else {
+                    // Collapse the job card back to the fixed height (200px)
+                    card.style.height = '200px';
+                    card.style.overflow = 'hidden';  // Hide overflowing content
+                    card.classList.add('collapsed');
+                }
+            });
+        }
+
+        // Apply event listener to all static job cards on page load
+        document.querySelectorAll('.job-card').forEach(card => {
+            card.classList.add('collapsed');  // Set initial state as collapsed
+            makeCardExpandable(card);
+        });
+
+        // Handle the search form submission (dynamic job card creation)
+        searchForm.addEventListener('submit', function (event) {
+            event.preventDefault();  // Prevent the form from submitting normally
+
+            const query = searchInput.value.trim();
+
+            if (query.length > 0) {
+                // Show the h2 title and update it with the search query
+                searchTitle.style.display = 'block';
+                searchTitle.textContent = `Based on your search for "${query}":`;
+
+                // Perform the AJAX request to get the search results
+                fetch(`/search?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Clear the current job cards
+                        jobCardsContainer.innerHTML = '';
+
+                        if (data.length > 0) {
+                            // Show the job cards container
+                            jobCardsContainer.style.display = 'block';
+
+                            // Loop through the results and create new job cards
+                            data.forEach(job => {
+                                const jobCardHTML = `
+                            <div class="job-card collapsed" style="height: 200px; overflow: hidden;">
+                                <div class="job-info">
+                                    <h3>${job.job_title}</h3>
+                                    <p>${job.job_description}</p>
+                                    <br>
+                                    <p>Company: ${job.company_name}</p>
+                                    <p>Date Listed: ${job.job_listed}</p>
+                                </div>
+                                <div class="job-action">
+                                    <a href="${job.job_detail_url}" target="_blank">
+                                        <button type="button">Apply</button>
+                                    </a>
+                                </div>
+                            </div>`;
+
+                                // Insert the new job card into the DOM
+                                jobCardsContainer.insertAdjacentHTML('beforeend', jobCardHTML);
+
+                                // Apply the click event listener to the newly created job card
+                                const newlyCreatedCard = jobCardsContainer.lastElementChild;
+                                makeCardExpandable(newlyCreatedCard);
+                            });
+                        } else {
+                            // Show a message if no jobs were found
+                            jobCardsContainer.style.display = 'block';
+                            jobCardsContainer.innerHTML = '<p>No jobs found for your search.</p>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching search results:', error);
+                    });
+            }
+        });
+    });
+
+</script>
 {% endblock %}
 
 {% block footer %}

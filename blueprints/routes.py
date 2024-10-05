@@ -110,31 +110,46 @@ def index():
     
 @home_blueprint.route('/search_suggestions', methods=['GET'])
 def search_suggestions():
-    query = request.args.get('query', '')  # Get the query from the AJAX request
-    print(f'Search query: {query}')  # Debug: Check the query being passed in
-
-    if query:
-        suggestions = get_search_suggestions(query)  # Query the database for matching items
-        print(f'Suggestions: {suggestions}')  # Debug: Check what suggestions are returned
-    else:
-        suggestions = []
-
-    return jsonify(suggestions)  # Return the results as JSON
+    query = request.args.get('query', '')  # Get the query string
+    suggestions = get_search_suggestions(query) if query else []
+    return jsonify(suggestions)  # Return the list as JSON
 
 def get_search_suggestions(query):
     con = get_db_connection()  # Connect to your SQLite or other database
     cur = con.cursor()
 
-    # Query the database (adjust this based on your schema)
-    cur.execute("SELECT job_title FROM jobdesc WHERE job_title LIKE ? COLLATE NOCASE", ('%' + query + '%',))
+    # Query the database for job titles matching the search query
+    cur.execute("SELECT job_title FROM jobdesc WHERE job_title LIKE ? LIMIT 10", ('%' + query + '%',))
     results = cur.fetchall()
-    
-    print(f'Database results: {results}')  # Debug: Check the actual results fetched from the DB
-
     con.close()
 
-    # Return a list of matching results
+    # Return a list of matching job titles
     return [result[0] for result in results]
+
+@home_blueprint.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query', '')  # Get the search query from the form
+    if query:
+        con = get_db_connection()  # Establish a connection to your database
+        cur = con.cursor()
+        
+        # Fetch job titles that match the search query
+        cur.execute("SELECT * FROM jobdesc WHERE job_title LIKE ?", ('%' + query + '%',))
+        results = cur.fetchall()
+        con.close()
+
+        # Prepare the results as JSON data
+        job_list = [{
+            'job_title': row['job_title'],
+            'job_description': row['job_description'],
+            'company_name': row['company_name'],
+            'job_listed': row['job_listed'],
+            'job_detail_url': row['job_detail_url']
+        } for row in results]
+
+        return jsonify(job_list)  # Return the list of jobs as JSON data
+    
+    return jsonify([])  # Return an empty list if no query
 
 @login_blueprint.route('/login',methods = ["POST","GET"])
 def index():
@@ -181,8 +196,13 @@ def index():
             is_admin = 0
 
             con = get_db_connection()  
-            cur = con.cursor()   
-            cur.execute("INSERT into userdata (username, hashed_password,is_admin) values (?,?,?)",(name,hashed_password,is_admin))  
+            cur = con.cursor()
+            cur.execute(
+                "INSERT INTO userdata (username, hashed_password, is_admin, nested_skills, soft_skills, hard_skills) "
+                "VALUES (?,?,?,?,?,?)", 
+                (name, hashed_password, is_admin, '', '', '')
+            )
+   
             con.commit()
 
             cur.execute('SELECT id FROM userdata WHERE username = ?', (name,))  
