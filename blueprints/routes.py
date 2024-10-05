@@ -197,11 +197,7 @@ def index():
 
             con = get_db_connection()  
             cur = con.cursor()
-            cur.execute(
-                "INSERT INTO userdata (username, hashed_password, is_admin, nested_skills, soft_skills, hard_skills) "
-                "VALUES (?,?,?,?,?,?)", 
-                (name, hashed_password, is_admin, '', '', '')
-            )
+            cur.execute("INSERT into userdata (username, hashed_password,is_admin) values (?,?,?)",(name,hashed_password,is_admin)) 
    
             con.commit()
 

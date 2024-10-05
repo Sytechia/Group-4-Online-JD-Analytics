@@ -396,17 +396,6 @@
                     return [];
                 });
         }
-        document.querySelectorAll('.job-card').forEach(button => {
-            button.addEventListener('click', () => {
-                const jobCard = button;
-
-                if (jobCard.style.height === '200px') {
-                    jobCard.style.height = 'auto';
-                } else {
-                    jobCard.style.height = '200px';
-                }
-            });
-        });
 
         // Event listener for typing in the search bar (suggestion box)
         searchInput.addEventListener('input', function () {
