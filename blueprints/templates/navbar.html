@@ -1,93 +1,30 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav mr-auto">
+    <ul class="navbar-nav w-100">
+      <!-- Left-aligned items -->
       <li class="nav-item active">
         <a class="nav-link" href="/">Home</a>
       </li>
-
-      <!-- Search Bar inside an <li> 
-      <li class="nav-item search-bar">
-        <form class="form-inline my-2 my-lg-0" id="search-form" autocomplete="off">
-          <input class="form-control me-2" id="search-input" type="search" placeholder="Search" aria-label="Search"
-            name="query" required>
-          <button class="btn btn-outline-success" type="submit">Search</button>
-          Suggestion Box 
-          <div id="suggestion-box" class="suggestion-box"></div>
-        </form>
+      <li class="nav-item ml-auto"> <!-- Spacer to push right-aligned items -->
       </li>
-       -->
-      {% if session.get('username') %}
-      <li class="nav-item" style="float: right;">
-        <a class="nav-link" href="/logout">Logout</a>
-      </li>
-      <li class="nav-item" style="float: right;">
-        <a class="nav-link" href="/profile">Profile</a>
-      </li>
-      {% else %}
-      <li class="nav-item" style="float: right;">
-        <a class="nav-link" href="/login">Login</a>
-      </li>
-      {% endif %}
+      <!-- Right-aligned items -->
       {% if session.get('is_admin') %}
-      <!-- If session username is present and is an admin, show Admin -->
       <li class="nav-item">
         <a class="nav-link" href="/admindashboard">Admin</a>
+      </li>
+      {% endif %}
+      {% if session.get('username') %}
+      <li class="nav-item">
+        <a class="nav-link" href="/profile">Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/logout">Logout</a>
+      </li>
+      {% else %}
+      <li class="nav-item">
+        <a class="nav-link" href="/login">Login</a>
       </li>
       {% endif %}
     </ul>
   </div>
 </nav>
-
-<script>
-  const searchInput = document.getElementById('search-input');
-  const suggestionBox = document.getElementById('suggestion-box');
-
-  // Function to fetch suggestions from the backend
-  function fetchSuggestions(query) {
-    return fetch(`/search_suggestions?query=${query}`)
-      .then(response => response.json())  // Parse the JSON response
-      .then(data => data)  // Return the data (suggestions)
-      .catch(error => {
-        console.error('Error fetching suggestions:', error);
-        return [];
-      });
-  }
-
-  // Event listener for typing in the search bar
-  searchInput.addEventListener('input', function () {
-    const query = searchInput.value.trim();
-
-    if (query.length > 2) {  // Only fetch suggestions for input longer than 2 characters
-      fetchSuggestions(query).then(suggestions => {
-        suggestionBox.innerHTML = '';  // Clear previous suggestions
-        suggestionBox.style.display = 'block';  // Show the suggestion box
-
-        if (suggestions.length > 0) {
-          suggestions.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.textContent = item;  // Add the suggestion text
-            div.onclick = function () {
-              searchInput.value = item;  // Set input value to clicked suggestion
-              suggestionBox.innerHTML = '';  // Clear suggestions
-              suggestionBox.style.display = 'none';  // Hide the suggestion box after selection
-            };
-            suggestionBox.appendChild(div);  // Append the suggestion to the suggestion box
-          });
-        } else {
-          suggestionBox.innerHTML = '<div class="suggestion-item">No results found</div>';
-        }
-      });
-    } else {
-      suggestionBox.innerHTML = '';  // Clear suggestions for short input
-      suggestionBox.style.display = 'none';  // Hide the suggestion box if input is too short
-    }
-  });
-
-  // Optional: Hide the suggestion box if clicked outside
-  document.addEventListener('click', function (e) {
-    if (!suggestionBox.contains(e.target) && !searchInput.contains(e.target)) {
-      suggestionBox.style.display = 'none';
-    }
-  });
-</script>
