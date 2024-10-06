@@ -9,7 +9,7 @@ from controllers.skill_diagram import check_metrics_for_plot, hard_skills, soft_
 from controllers.crawler import JobSpider
 
 import os
-from controllers.resume import allowed_file, process_cv, format_feedback
+from controllers.resume import allowed_file, process_cv, format_feedback, suggest_job, ai_suggest_job, insert_recommended_job
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
@@ -239,6 +239,11 @@ def index():
         userid = session['id']
         cur.execute("UPDATE userdata SET feedback = ? ,field_of_interest = ? WHERE id = ?", (feedback,foi,userid,))
         con.commit()
+        
+        # AI Job Suggestions: Extract resume text and get job suggestions
+        resume_text = extract_text_from_pdf_matthew(file_path)
+        insert_recommended_job(resume_text, userid)
+        
         ROOT_DIR = Path.cwd()
         metrics_file_path = ROOT_DIR / 'metrics.md'  # Path to the metrics.md file
 
@@ -255,8 +260,8 @@ def index():
         matching_keywords_string = ', '.join(matching_keywords)
 
         stored_text = str({'Resume Text': matching_keywords_string , 'Number of hours': number_of_hours, 'Certification number': certification_number, 'Education level': education_level})
-        # Insert resume_text into database
         
+        # Insert resume_text into database
         insert_resume_text(userid, stored_text)
         return redirect("/")
 
@@ -383,16 +388,24 @@ def profile():
         userid = session['id']
         con = get_db_connection()
         cur = con.cursor()
-        cur.execute("SELECT feedback FROM userdata WHERE id = ?", (userid,))
-        feedback = cur.fetchone()['feedback'] 
+        cur.execute("SELECT feedback, recommended_job FROM userdata WHERE id = ?", (userid,))
+        result = cur.fetchone()
+        
+        if result:
+            feedback = result['feedback']
+            recommended_job = result['recommended_job']
+        else:
+            feedback = None
+            recommended_job = None
+        
         con.close()
         
         # Fetch soft and hard skills from the database
         soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
         if  soft_skills_list == [] or hard_skills_list == []:
-            return render_template('profile.html',feedback=feedback)
+            return render_template('profile.html',feedback=feedback, recommended_job=recommended_job)
         else :
-            return render_template('profile.html', feedback=feedback, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+            return render_template('profile.html', feedback=feedback, recommended_job=recommended_job, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
 
 # Route for generating the hard skills plot
 @profile_page_blueprint.route('/plot.png')

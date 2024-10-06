@@ -35,7 +35,7 @@ def extract_text_from_docx(docx_file_path):
     text = '\n'.join([para.text for para in doc.paragraphs])
     return text
 
-# Function to get CV feedback using OpenAI API
+# Function to get CV feedback using OpenAI API, ZACHARY'S CODE
 def get_cv_feedback(cv_text,foi):
     prompt = f"""
     You are an expert in recruitment and resume evaluation. Please review the following CV and provide remarks regarding:
@@ -73,6 +73,7 @@ def process_cv(file_path, filename,foi):
     feedback = get_cv_feedback(cv_text,foi)
     feedback = format_feedback(feedback)
     return (f'{feedback}')
+    
 
 def format_feedback(feedback):
     # Replace ### with <li>
@@ -82,6 +83,33 @@ def format_feedback(feedback):
     return feedback
 
 #<-----------------Matthew Codes Start ------------------------>
+# Function to get CV feedback using OpenAI API, MATTHEW'S CODE
+def suggest_job(cv_text):
+    prompt = f"""
+    You are an expert career advisor. 
+    Based on the following CV, please analyze and summarize the candidate's experience, skills, and qualifications. 
+    Then, suggest relevant 3 jobs that align well with their background and expertise.
+    CV: {cv_text}
+    """
+    
+    response = openai.chat.completions.create(
+        model="gpt-4o-mini",  # Ensure this is a valid model name
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=500  # Adjust as needed
+    )
+    # Extract the job suggestions from the response
+    job_suggestions = response.choices[0].message.content.strip()
+    
+    return (f'{job_suggestions}')
+
+def ai_suggest_job(cv_text):
+    job_feedback = suggest_job(cv_text)
+    job_feedback = format_feedback(job_feedback)
+    return (f'{job_feedback}')
+
 def extract_text_from_pdf_matthew(pdf_file_path):
     text = ""
     try:
@@ -188,4 +216,23 @@ def insert_resume_text(userid, resume_text):
     
     finally:
         con.close()  # Close the connection
+        
+def insert_recommended_job(cv_text, userid):
+    # Get job suggestions using the AI function
+    job_feedback = ai_suggest_job(cv_text)
+    
+    # Connect to the database
+    con = get_db_connection()
+    cur = con.cursor()
+
+    # Insert job suggestions into the 'recommended_job' column for the current user
+    cur.execute("UPDATE userdata SET recommended_job = ? WHERE id = ?", (job_feedback, userid))
+    
+    # Commit the changes and close the connection
+    con.commit()
+    con.close()
+
+    # Optionally return a confirmation or success message
+    return "Job recommendations saved successfully."
+
 #<-----------------Matthew Codes End ------------------------>
