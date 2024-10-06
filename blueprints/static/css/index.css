@@ -1,13 +1,15 @@
+/* Global reset for all elements */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-html,
-body {
+/* Body and HTML styling */
+html, body {
     height: 100%;
-    overflow: hidden;
+    overflow-y: auto; /* Allow vertical scrolling */
+    padding-top: 30px; /* Ensure content starts below the fixed navbar */
 }
 
 body {
@@ -16,20 +18,18 @@ body {
     align-items: center;
     background-color: #f0f0f0;
     margin: 0;
-    padding: 0;
-    margin-top: 30px;
     flex-direction: column;
-    min-height: 100vh;
-    overflow-y: auto;
 }
 
+/* Flexbox scrollable container */
 .scroll-container {
     display: flex;
-    overflow-x: auto;
     white-space: nowrap;
     padding: 20px;
+    overflow: hidden;  /* Disable scrolling within the container */
 }
 
+/* Tiles for content display */
 .tile {
     flex: 0 0 auto;
     width: 300px;
@@ -64,6 +64,7 @@ body {
     font-size: 0.9em;
 }
 
+/* Chat message container and messages */
 .chat-messages {
     flex-grow: 1;
     overflow-y: auto;
@@ -96,6 +97,7 @@ body {
     color: white;
 }
 
+/* Chat input styles */
 .chat-input {
     display: flex;
     padding: 10px 0;
@@ -125,49 +127,26 @@ button:hover {
     background-color: #0056b3;
 }
 
-CSS for navbar
-ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #333;
-}
-
-li {
-    float: left;
-}
-
-li a {
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-}
-/* Change the link color to #111 (black) on hover */
-li a:hover {
-    background-color: #111;
-}
-
+/* Navbar styling */
 .active {
     background-color: #c74747;
 }
 
-/* Create two equal columns that floats next to each other */
+/* Columns and rows demo (can be removed) */
 .column {
     float: left;
     width: 50%;
     padding: 10px;
-    height: 300px; /* Should be removed. Only for demonstration */
-  }
+    height: 300px;
+}
 
-/* Clear floats after the columns */
 .row:after {
     content: "";
     display: table;
     clear: both;
 }
+
+/* Navbar specifics */
 nav {
     position: fixed;
     top: 0;
@@ -198,33 +177,25 @@ nav ul li a:hover {
     background-color: #575757;
 }
 
+/* Navbar flexbox behavior */
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;  /* Ensures left and right spacing */
+}
+
+/* Spacer to push right-aligned items */
+.navbar-nav .ml-auto {
+    margin-left: auto;
+}
+
+/* Adds spacing between nav items */
+.nav-item {
+    margin-left: 10px;
+}
 
 /* Style the search box inside the navigation bar */
-.nav[type=text] {
-    float: right;
-    padding: 6px;
-    border: none;
-    margin-top: 8px;
-    margin-right: 16px;
-    font-size: 17px;
-}
-
-/* Ensure the container uses flexbox for proper layout */
-.navbar .container-fluid {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Ensure the <ul> spans full width */
-.navbar-nav {
-    flex-grow: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Center the search bar and give it a fixed width */
 .navbar-nav .search-bar {
     flex-grow: 1;
     display: flex;
@@ -234,7 +205,6 @@ nav ul li a:hover {
 /* Adjust the input field and button widths */
 .navbar-nav .search-bar .form-control {
     width: 250px;
-    /* Adjust this width as needed */
     margin-right: 10px;
 }
 
@@ -242,15 +212,16 @@ nav ul li a:hover {
     white-space: nowrap;
 }
 
+/* Suggestion box for search bar */
 .suggestion-box {
     position: absolute;
     background-color: white;
     border: 1px solid #ddd;
     max-height: 200px;
     overflow-y: auto;
-    width: 300px;  /* Match the width of your input */
+    width: 300px;
     z-index: 999;
-    display: none;  /* Hidden by default, shown when suggestions are available */
+    display: none;
 }
 
 .suggestion-item {
@@ -263,18 +234,18 @@ nav ul li a:hover {
     background-color: #f1f1f1;
 }
 
-/* Search bar custom styling */
+/* Search input custom styling */
 #search-input {
     width: 300px;
 }
-button{
-    width: 20%;
-            padding: 10px;
-            background-color: #c74747;
-            border: none;
-            color: #000;
-            border-radius: 5px;
-            margin-left: 10px;
-            cursor: pointer;
 
+button {
+    width: 20%;
+    padding: 10px;
+    background-color: #c74747;
+    border: none;
+    color: #000;
+    border-radius: 5px;
+    margin-left: 10px;
+    cursor: pointer;
 }

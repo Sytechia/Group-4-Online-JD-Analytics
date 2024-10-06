@@ -1,6 +1,8 @@
 # parse_data.py
 import re
 import sqlite3
+
+import bleach
 import openai
 from bs4 import BeautifulSoup
 import requests
@@ -12,10 +14,8 @@ def parse_job(response, cursor, conn):
     soup = BeautifulSoup(response.body, 'html.parser')
     jobs = soup.find_all("div", class_="base-card")
     print(f"Found {len(jobs)} jobs")
-    # print(soup.prettify())
 
     for job in jobs:
-
         job_item = {
             'job_id': None,
             'original_job_title': None,
@@ -45,7 +45,8 @@ def parse_job(response, cursor, conn):
                 continue
 
             if job_id_exists(cursor, job_item['job_id']):
-                print(f"Job ID {job_item['job_id']} already exists: {job_item['job_detail_url']}")
+                #Check if any updates are needed
+                update_existing_job(cursor, conn, job_item)
                 continue
 
             job_title_tag = job.find("h3", class_="base-search-card__title")
@@ -83,7 +84,9 @@ def parse_job(response, cursor, conn):
 
             get_job_description_soup, job_position_level_soup = fetch_job_details(job_item['job_detail_url'])
 
+
             job_item['job_description'] = get_job_description(get_job_description_soup)
+
             job_item['job_position_level'] = get_job_position_level(job_position_level_soup,job_item['job_description'])
 
 
@@ -113,26 +116,81 @@ def job_id_exists(cursor, job_id):
     cursor.execute('SELECT 1 FROM jobdesc WHERE job_id = ?', (job_id,))
     return cursor.fetchone() is not None
 
+def update_existing_job(cursor, conn, job_item):
+    cursor.execute('SELECT * FROM jobdesc WHERE job_id = ?', (job_item['job_id'],))
+    existing_job = cursor.fetchone()
+
+    if not existing_job:
+        print(f"Job ID {job_item['job_id']} not found in the database.")
+        return
+
+    updates = []
+    update_values = []
+
+    for key, value in job_item.items():
+        if value and value != existing_job[key]:
+            updates.append(f"{key} = ?")
+            update_values.append(value)
+
+    if not updates:
+        print(f"No updates required for Job ID {job_item['job_id']}.")
+        return
+
+    if updates:
+        update_values.append(job_item['job_id'])
+        update_query = f"UPDATE jobdesc SET {', '.join(updates)} WHERE job_id = ?"
+        cursor.execute(update_query, update_values)
+        conn.commit()
+        print(f"Updated job: {job_item['job_detail_url']}")
+
 def get_job_description(job_description_soup):
     if job_description_soup is None:
         return "Could not retrieve Job Description due to rate limiting"
 
     if job_description_soup:
-        # Remove unwanted elements
-        for element in job_description_soup.find_all(['span', 'a']):
-            element.decompose()
+        #unwrap elements
+        for element in job_description_soup.find_all(['span']):
+            element.unwrap()
 
-        # Replace bullet points
-        for ul in job_description_soup.find_all('ul'):
-            for li in ul.find_all('li'):
-                li.insert(0, '-')
+        # Remove unwanted strings
+        unwanted_strings = ['Show less', 'Show more']
+        for unwanted in unwanted_strings:
+            for elem in job_description_soup(text=lambda text: text and unwanted in text):
+                elem.extract()
 
-        text = job_description_soup.get_text(separator='\n').strip()
-        text = text.replace('\n\n', '')
-        text = text.replace('::marker', '-')
-        text = text.replace('-\n', '- ')
-        text = text.replace('Show less', '').replace('Show more', '')
-        return text
+        print(f"Job Description: {job_description_soup}")
+        print(f"Job Description Prettified!!!!!!!!!: {job_description_soup.prettify()}")
+
+        # # Get the cleaned HTML content
+        html_content = str(job_description_soup.prettify())
+
+        print(f"html_content: {html_content}")
+
+        # Sanitize the HTML to prevent XSS attacks
+        allowed_tags = [
+            'p', 'ul', 'ol', 'li', 'strong', 'br', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'blockquote', 'code', 'pre', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+            'a', 'b', 'i', 'u', 'span', 'div'
+        ]
+        allowed_attributes = {
+            'a': ['href', 'title'],
+            'img': ['src', 'alt', 'title'],
+            '*': ['style']  # Allow style attribute if needed
+        }
+
+        clean_html = bleach.clean(
+            html_content,
+            tags=allowed_tags,
+            attributes=allowed_attributes,
+            strip=True
+        )
+        soup = BeautifulSoup(clean_html, 'html.parser')
+        clean_html = soup.prettify()
+
+        print(f"clean_html: {clean_html}")
+
+        return clean_html
+
     else:
         return "Could not find Job Description"
 
@@ -148,7 +206,7 @@ def get_job_position_level(job_position_level_soup,job_description):
                 return job_position_level
             else:
                 prompt = (f"Based on the {job_description} job description, what is the seniority level of the job? You have to choose from the following options: "
-                          f"Entry level, Associate, Mid-Senior level, Director, Executive."
+                          f"Internship, Entry level, Associate, Mid-Senior level, Director, Executive."
                           f"Please choose the most appropriate option and only return the selected option.")
 
                 openai.api_key = openai_api_key
@@ -214,6 +272,8 @@ def extract_job_position(job_title):
     # Extract the text response
     job_position = response.choices[0].message.content.strip()
     return job_position
+
+
 
 
 
