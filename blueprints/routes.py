@@ -52,14 +52,14 @@ def index():
         results = cur.fetchone()
         con.close()
                        
-        # if results:
-        #     keys = ['soft_skills', 'hard_skills', 'feedback', 'field_of_interest']
-        #     items_to_fill_up = [key for key, value in zip(keys, results) if value is None]
+        if results:
+            keys = ['soft_skills', 'hard_skills', 'feedback', 'field_of_interest']
+            items_to_fill_up = [key for key, value in zip(keys, results) if value is None]
             
-        #     if items_to_fill_up:
-        #         items_to_fill_up_str = ', '.join(items_to_fill_up)
-        #         flash(f'Please complete your profile ({items_to_fill_up_str}) to access this page.', 'danger')
-        #         return redirect('/register')
+            if items_to_fill_up:
+                items_to_fill_up_str = ', '.join(items_to_fill_up)
+                flash(f'Please complete your profile ({items_to_fill_up_str}) to access this page.', 'danger')
+                return redirect('/register')
         
         # Connect to the database
         con = get_db_connection()
