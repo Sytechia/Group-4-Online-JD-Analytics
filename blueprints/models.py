@@ -11,35 +11,33 @@ class Config:
     OPENAI_API_KEY = os.environ.get(openai_api_key)
 
 class User(UserMixin):
-    def __init__(self, id, username, hashed_password,nested_skills,soft_skills,hard_skills, is_admin):
-        self.id = id
-        self.username = username
-        self.hashed_password = hashed_password
-        self.nested_skills = nested_skills
-        self.soft_skills = soft_skills
-        self.hard_skills = hard_skills
-        self.is_admin = is_admin
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        if not hasattr(self, 'id'):
+            raise AttributeError("User object must have an 'id' attribute")
+        print(f"User created with id: {self.id}")  # Debugging statement
 
+    def get_id(self):
+        return str(self.id)  # Ensure the ID is returned as a string
+    
     @staticmethod
     def get(user_id):
+        print(f"Attempting to fetch user with id: {user_id}")  # Debugging statement
         conn = get_db_connection()
         cursor = conn.cursor()
+        
+        # Get the column names correctly from the second item of each tuple
+        cursor = cursor.execute('PRAGMA table_info(userdata)')
+        columns = [column[1] for column in cursor.fetchall()]  # Extract the second element (column name)
+
+        # Fetch the user data
         cursor.execute('SELECT * FROM userdata WHERE id = ?', (user_id,))
-        user = cursor.fetchone()
+        user_data = cursor.fetchone()
         conn.close()
 
-        if user:
-            return User(user[0], user[1], user[2], user[3],user[4], user[5], user[6])
+        if user_data:
+            # Zip the correct column names with the user data to create a dictionary of attributes
+            user_dict = dict(zip(columns, user_data))
+            return User(**user_dict)
         return None
-
-    @staticmethod
-    def get_by_username(username):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM userdata WHERE username = ?', (username,))
-        user = cursor.fetchone()
-        conn.close()
-        if user:
-            return User(user[0], user[1], user[2], user[3],user[4], user[5], user[6])
-        return None
-    
