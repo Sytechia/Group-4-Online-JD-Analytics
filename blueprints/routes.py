@@ -52,14 +52,14 @@ def index():
         results = cur.fetchone()
         con.close()
                        
-        if results:
-            keys = ['soft_skills', 'hard_skills', 'feedback', 'field_of_interest']
-            items_to_fill_up = [key for key, value in zip(keys, results) if value is None]
+        # if results:
+        #     keys = ['soft_skills', 'hard_skills', 'feedback', 'field_of_interest']
+        #     items_to_fill_up = [key for key, value in zip(keys, results) if value is None]
             
-            if items_to_fill_up:
-                items_to_fill_up_str = ', '.join(items_to_fill_up)
-                flash(f'Please complete your profile ({items_to_fill_up_str}) to access this page.', 'danger')
-                return redirect('/register')
+        #     if items_to_fill_up:
+        #         items_to_fill_up_str = ', '.join(items_to_fill_up)
+        #         flash(f'Please complete your profile ({items_to_fill_up_str}) to access this page.', 'danger')
+        #         return redirect('/register')
         
         # Connect to the database
         con = get_db_connection()
@@ -188,15 +188,24 @@ def index():
                 return render_template("login.html")  
             if password != password2:
                 flash('Password do not match.', 'danger')
-                return render_template("login.html") 
-            
-            hashed_password = generate_password_hash(password)
+                return render_template("login.html")            
 
             # Demo Purpose
             is_admin = 0
 
             con = get_db_connection()  
             cur = con.cursor()
+
+            # Check if username already exists
+            cur.execute("SELECT * FROM userdata WHERE username = ?", (name,))
+            existing_user = cur.fetchone()
+
+            if existing_user:
+                flash('Username already exists.', 'danger')
+                return render_template("login.html")
+
+            hashed_password = generate_password_hash(password)
+
             cur.execute("INSERT into userdata (username, hashed_password,is_admin) values (?,?,?)",(name,hashed_password,is_admin)) 
    
             con.commit()
