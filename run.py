@@ -7,7 +7,6 @@ from controllers.crawler import JobSpider
 from scrapy.crawler import CrawlerProcess
 from twisted.internet import defer, task
 
-<<<<<<< Updated upstream
 def start_crawler():
     process = CrawlerProcess()
     process.crawl(JobSpider)
@@ -23,25 +22,6 @@ def start_crawler():
 
 if __name__ == "__main__":
     app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
-=======
-if __name__ == "__main__":  
-    def start_crawler():
-        process = CrawlerProcess()
-        process.crawl(JobSpider)
-
-        @defer.inlineCallbacks
-        def crawl():
-            yield process.crawl(JobSpider)
-
-        def run_crawler():
-            task.LoopingCall(crawl).start(1800.0)   # 30-minute interval
-
-        process.start(run_crawler())
-
-if __name__ == "__main__":
-    app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
-    app.run( debug=True,threaded=True)
->>>>>>> Stashed changes
     crawler_thread = threading.Thread(target=start_crawler)
     crawler_thread.start()
     app.run(debug=True, threaded=True)
