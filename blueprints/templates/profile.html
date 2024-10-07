@@ -64,6 +64,15 @@
             <td>{{feedback | replace('\n', '<br>')|  safe}}</td>    
         </tr>    
 </table> 
+
+<table border="5" style="width:100%;">  
+    <thead>     
+        <td style="font-weight:bold; text-align: center;">{{ session['username'] }}'s Recommended Job</td>
+    </thead>  
+    <tr>   
+        <td>{{ recommended_job | replace('\n', '<br>') | safe }}</td>    
+    </tr>    
+</table>
 {% endblock %}
 
 {% block content %}
