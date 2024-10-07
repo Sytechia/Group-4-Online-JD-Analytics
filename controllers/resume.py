@@ -233,6 +233,6 @@ def insert_recommended_job(cv_text, userid):
     con.close()
 
     # Optionally return a confirmation or success message
-    return "Job recommendations saved successfully."
+    return job_feedback
 
 #<-----------------Matthew Codes End ------------------------>
