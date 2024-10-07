@@ -54,7 +54,7 @@ def get_cv_feedback(cv_text,foi):
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=500  # Adjust as needed
+        max_tokens=800  # Adjust as needed
     )
     # Extract the feedback from the response
     feedback = response.choices[0].message.content.strip()

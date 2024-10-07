@@ -383,11 +383,13 @@ def profile():
             userid = session['id']
             insert_resume_text(userid, stored_text)
             con = get_db_connection()
-            cur.execute("UPDATE userdata SET nested_skills = ? WHERE id = ?", (stored_text,userid,))
             cur = con.cursor()
-            feedback = cur.fetchone()['feedback'] 
-            cur.execute('SELECT recommended_job FROM userdata WHERE id = ?', (userid,))
-            recommended_job = cur.fetchone()['recommended_job'] 
+            cur.execute("UPDATE userdata SET nested_skills = ? WHERE id = ?", (stored_text,userid,))
+            con.commit()
+            cur.execute('SELECT recommended_job,feedback FROM userdata WHERE id = ?', (userid,))
+            result = cur.fetchone()
+            recommended_job = result['recommended_job'] 
+            feedback = result['feedback'] 
             con.close()
         
             # Fetch soft and hard skills from the database
