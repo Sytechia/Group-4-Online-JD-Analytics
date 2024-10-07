@@ -227,16 +227,22 @@ def get_job_position_level(job_position_level_soup,job_description):
 
 
 "Ray make this function as a portion of your code as well"
-def make_request_with_retries(url, retries=5, backoff_factor=1):
-    for i in range(retries):
+def make_request_with_retries(url, backoff_factor=1):
+    retries = 0
+
+    while True:
         response = requests.get(url)
         if response.status_code == 429:
-            wait_time = backoff_factor * (2 ** i)
+            retry_after = response.headers.get('Retry-After')
+            if retry_after:
+                wait_time = int(retry_after)
+            else:
+                wait_time = retries + 1
             print(f"Rate limited. Retrying in {wait_time} seconds...")
             time.sleep(wait_time)
+            retries += 1
         else:
             return response
-    return None
 """"""""
 
 def fetch_job_details(job_detail_url):
