@@ -9,7 +9,9 @@ from scrapy.crawler import CrawlerProcess
 from multiprocessing import Process
 
 def start_crawler():
-    process = CrawlerProcess()
+    process = CrawlerProcess({
+        'LOG_LEVEL': 'WARNING'  # Set Scrapy logging level to WARNING
+    })
     process.crawl(JobSpider)
     process.start()
 
@@ -29,4 +31,4 @@ if __name__ == "__main__":
     app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
     crawler_thread = threading.Thread(target=schedule_crawler)
     crawler_thread.start()
-    app.run(debug=True, threaded=True)
+    app.run(debug=False, threaded=True)
