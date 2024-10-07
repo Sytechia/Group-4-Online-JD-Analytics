@@ -15,7 +15,8 @@ class JobSpider(scrapy.Spider):
 
     # List of job titles to search for
     job_titles = [
-        "Software Engineer", "Systems Administrator", "Network Engineer",
+        "Software Engineer",
+        "Systems Administrator", "Network Engineer",
         "Database Administrator", "IT Support Specialist", "DevOps Engineer",
         "Security Analyst", "Web Developer", "Data Scientist", "Cloud Architect",
         "Project Manager", "Business Analyst", "Quality Assurance Engineer",
@@ -25,8 +26,9 @@ class JobSpider(scrapy.Spider):
 
     start_urls = [
         f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={quote_plus(job_title)}&location=Singapore&geoId=102454443&trk=public_jobs_jobs-search-bar_search-submit&start={i*25}"
-        for job_title in job_titles for i in range(3)
+        for job_title in job_titles for i in range(2)
     ]
+
     handle_httpstatus_list = [301, 302]
 
     def __init__(self):
@@ -35,11 +37,10 @@ class JobSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-        # for job_title in self.job_titles:
-            # for i in range(3):
-            #     url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={quote_plus(job_title)}&location=Singapore&geoId=102454443&trk=public_jobs_jobs-search-bar_search-submit&start={i*25}"
+            print(f"Scrapping: {url}")
             yield scrapy.Request(url, callback=self.parse, errback=self.errback, dont_filter=True, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'})
             time.sleep(1)
+
 
     def parse(self, response):
         yield from parse_job(response, self.cursor, self.conn)
@@ -64,22 +65,17 @@ class JobSpider(scrapy.Spider):
     def get_job_titles(cls):
         return cls.job_titles
 
-# def start_crawler():
+# if __name__ == "__main__":
 #     process = CrawlerProcess()
 #     process.crawl(JobSpider)
+#
+#     @defer.inlineCallbacks
+#     def crawl():
+#         yield process.crawl(JobSpider)
+#
+#     # def run_crawler():
+#     #     task.LoopingCall(crawl).start(5.0)
+#
+#     # process.start(run_crawler())
+#
 #     process.start()
-
-# def run_crawler():
-#     p = Process(target=start_crawler)
-#     p.start()
-#     p.join()
-
-# if __name__ == "__main__":
-#     run_crawler()
-
-#     # Schedule the crawler to run every 30 minutes
-#     schedule.every(1).minutes.do(run_crawler)
-
-#     while True:
-#         schedule.run_pending()
-#         time.sleep(1)
