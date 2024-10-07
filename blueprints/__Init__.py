@@ -73,7 +73,8 @@ def setup_database():
                     hard_skills BLOB ,
                     is_admin INTEGER ,
                     feedback BLOB,
-                    field_of_interest TEXT
+                    field_of_interest TEXT,
+                    recommended_job BLOB
                 )
             ''')
         conn.commit()

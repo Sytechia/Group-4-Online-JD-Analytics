@@ -239,6 +239,39 @@ nav ul li a:hover {
     width: 300px;
 }
 
+.flashes {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    position: fixed;
+    top: 10px; /* Adjust as needed */
+    width: 100%;
+    z-index: 1000; /* Ensure it appears above other content */
+}
+.flashes li {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    max-width: 80%; /* Adjust as needed */
+}
+.flashes .success {
+    background-color: #d4edda;
+    color: #155724;
+}
+.flashes .info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+.flashes .warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.flashes .danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
 button {
     width: 20%;
     padding: 10px;
@@ -249,3 +282,4 @@ button {
     margin-left: 10px;
     cursor: pointer;
 }
+

@@ -6,10 +6,10 @@ from nltk import sent_tokenize
 from secret_key import client
 from controllers.db_connections import get_db_connection
 from controllers.skill_diagram import check_metrics_for_plot, hard_skills, soft_skills,calculate_score
-
+from controllers.crawler import JobSpider
 
 import os
-from controllers.resume import allowed_file, process_cv, format_feedback
+from controllers.resume import allowed_file, process_cv, format_feedback, suggest_job, ai_suggest_job, insert_recommended_job
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
@@ -68,13 +68,24 @@ def index():
         filters = []
 
         levels = request.args.getlist('level')
-        print(f'Filtered Levels {levels}')
-        if levels:
-            query += " WHERE job_position_level IN ({})".format(','.join('?' for _ in levels))
-            filters = levels
+        selected_titles = request.args.getlist('job_title')
 
-        # Fetch all the job descriptions from the database
-        rows = con.execute(query, filters).fetchall()
+        query = "SELECT * FROM jobdesc WHERE 1=1"
+        params = []
+
+        print(f'Filtered Levels {levels}')
+        print(f'selected titles {selected_titles}')
+
+        if selected_titles:
+            title_filters = " OR ".join("job_title LIKE ?" for _ in selected_titles)
+            query += " AND (" + title_filters + ")"
+            params.extend(['%' + title + '%' for title in selected_titles])  # Wrap titles with wildcards for partial matching
+
+        if levels:
+            query += " AND job_position_level IN ({})".format(','.join('?' for _ in levels))
+            params.extend(levels)
+
+        rows = con.execute(query, params).fetchall()
 
         # Fetch the 10 most recent job descriptions from the database
         cur.execute("SELECT job_title, job_detail_url,job_listed,job_description, company_name, company_location FROM jobdesc order by job_listed asc limit 10")
@@ -82,6 +93,9 @@ def index():
         # Fetch the 10 most recent job descriptions from the database that contain the word 'data'
         cur.execute("SELECT job_title, job_detail_url,job_listed,job_description, company_name, company_location FROM jobdesc where job_title LIKE '%data%' order by job_listed asc limit 10")
         top_10_rows = cur.fetchall()
+
+        # Fetch all the job titles from JobSpider Class
+        job_titles = JobSpider.get_job_titles()
 
         # Commit the changes and close the connection
         con.close()
@@ -92,10 +106,9 @@ def index():
             user = session
             print(f'Logged in as {user["username"]}')
 
-        return render_template('home.html', user = user, rows = rows, selected_levels = levels, recent_10_rows = recent_10_rows, top_10_rows = top_10_rows)
-
-
-@home_blueprint.route('/search_suggestions', methods=['GET']) # real-time suggestions while typing
+        return render_template('home.html',user = user, rows = rows, selected_titles=selected_titles, selected_levels = levels, recent_10_rows = recent_10_rows, top_10_rows = top_10_rows, job_titles = job_titles)
+    
+@home_blueprint.route('/search_suggestions', methods=['GET'])
 def search_suggestions():
     query = request.args.get('query', '')  # Get the query string
     suggestions = get_search_suggestions(query) if query else []
@@ -162,7 +175,8 @@ def index():
                 
                 return redirect("/")
             else:
-                return render_template("login.html", message="Invalid username or password.")
+                flash('User does not exist or wrong password', 'danger')
+                return render_template("login.html")
         else:
             # Handles Register
             name = request.form.get("name")  
@@ -170,20 +184,20 @@ def index():
             password2 = request.form.get("password2")
 
             if not (name and password and password2):
-                return render_template("login.html", msg = "All fields are required.")  
-
+                flash('All fields are required.', 'danger')
+                return render_template("login.html")  
+            if password != password2:
+                flash('Password do not match.', 'danger')
+                return render_template("login.html") 
+            
             hashed_password = generate_password_hash(password)
 
             # Demo Purpose
-            is_admin = 1
+            is_admin = 0
 
             con = get_db_connection()  
             cur = con.cursor()
-            cur.execute(
-                "INSERT INTO userdata (username, hashed_password, is_admin, nested_skills, soft_skills, hard_skills) "
-                "VALUES (?,?,?,?,?,?)", 
-                (name, hashed_password, is_admin, '', '', '')
-            )
+            cur.execute("INSERT into userdata (username, hashed_password,is_admin) values (?,?,?)",(name,hashed_password,is_admin)) 
    
             con.commit()
 
@@ -225,6 +239,11 @@ def index():
         userid = session['id']
         cur.execute("UPDATE userdata SET feedback = ? ,field_of_interest = ? WHERE id = ?", (feedback,foi,userid,))
         con.commit()
+        
+        # AI Job Suggestions: Extract resume text and get job suggestions
+        resume_text = extract_text_from_pdf_matthew(file_path)
+        insert_recommended_job(resume_text, userid)
+        
         ROOT_DIR = Path.cwd()
         metrics_file_path = ROOT_DIR / 'metrics.md'  # Path to the metrics.md file
 
@@ -241,8 +260,8 @@ def index():
         matching_keywords_string = ', '.join(matching_keywords)
 
         stored_text = str({'Resume Text': matching_keywords_string , 'Number of hours': number_of_hours, 'Certification number': certification_number, 'Education level': education_level})
-        # Insert resume_text into database
         
+        # Insert resume_text into database
         insert_resume_text(userid, stored_text)
         return redirect("/")
 
@@ -369,16 +388,24 @@ def profile():
         userid = session['id']
         con = get_db_connection()
         cur = con.cursor()
-        cur.execute("SELECT feedback FROM userdata WHERE id = ?", (userid,))
-        feedback = cur.fetchone()['feedback'] 
+        cur.execute("SELECT feedback, recommended_job FROM userdata WHERE id = ?", (userid,))
+        result = cur.fetchone()
+        
+        if result:
+            feedback = result['feedback']
+            recommended_job = result['recommended_job']
+        else:
+            feedback = None
+            recommended_job = None
+        
         con.close()
         
         # Fetch soft and hard skills from the database
         soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
         if  soft_skills_list == [] or hard_skills_list == []:
-            return render_template('profile.html',feedback=feedback)
+            return render_template('profile.html',feedback=feedback, recommended_job=recommended_job)
         else :
-            return render_template('profile.html', feedback=feedback, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+            return render_template('profile.html', feedback=feedback, recommended_job=recommended_job, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
 
 # Route for generating the hard skills plot
 @profile_page_blueprint.route('/plot.png')
