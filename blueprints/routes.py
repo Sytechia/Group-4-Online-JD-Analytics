@@ -340,15 +340,19 @@ def profile():
             file.save(file_path)
                     
         if form_type == 'get_feedback':
+            userid = session['id']
+            
+            # Process CV to update job recommendation
+            resume_text = extract_text_from_pdf_matthew(file_path)
+            recommended_job = insert_recommended_job(resume_text, userid)
+                        
             # Process the CV and get feedback
             con = get_db_connection()
             cur = con.cursor()
-            userid = session['id']
             cur.execute('SELECT field_of_interest FROM userdata WHERE id = ?', (userid,))  
             foi = cur.fetchone()['field_of_interest'] 
             feedback = str(process_cv(file_path, filename,foi))
-            feedback = format_feedback(feedback)
-            cur.execute("UPDATE userdata SET feedback = ? WHERE id = ?", (feedback,userid,))
+            cur.execute("UPDATE userdata SET feedback = ?, recommended_job = ? WHERE id = ?", (feedback,recommended_job,userid,))
             con.commit()
             cur.execute('SELECT recommended_job FROM userdata WHERE id = ?', (userid,))
             recommended_job = cur.fetchone()['recommended_job']            
@@ -359,7 +363,7 @@ def profile():
             if  soft_skills_list == [] or hard_skills_list == []:
                 return render_template('profile.html' ,feedback=feedback,recommended_job=recommended_job)
             else :
-                return render_template('profile.html', feedback=feedback,recommended_job=recommended_job,soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+                return render_template('profile.html', feedback=feedback,soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list,recommended_job=recommended_job)
         
         elif form_type == 'update_user_skills':
             # Example usage in your function:
@@ -370,7 +374,11 @@ def profile():
             resume_text = extract_text_from_pdf_matthew(file_path)
             resume_keywords = preprocess_text(resume_text)
             metrics_keywords = extract_keywords_from_metrics(metrics_file_path, resume_keywords, threshold=80)
-            matching_keywords = compare_resume_to_metrics(resume_keywords, metrics_keywords)                
+            matching_keywords = compare_resume_to_metrics(resume_keywords, metrics_keywords)          
+            
+            recommended_job = ai_suggest_job(resume_text)
+            foi = request.form.get('foi', 'General')  # Use a default or retrieve from form input
+            feedback = process_cv(file_path, filename, foi)
             
             #Hard Skill insert
             number_of_hours = request.form['number_of_hours']
@@ -384,7 +392,7 @@ def profile():
             insert_resume_text(userid, stored_text)
             con = get_db_connection()
             cur = con.cursor()
-            cur.execute("UPDATE userdata SET nested_skills = ? WHERE id = ?", (stored_text,userid,))
+            cur.execute("UPDATE userdata SET nested_skills = ?, recommended_job = ?, feedback = ? WHERE id = ?", (stored_text, recommended_job, feedback, userid))
             con.commit()
             cur.execute('SELECT recommended_job,feedback FROM userdata WHERE id = ?', (userid,))
             result = cur.fetchone()
@@ -398,7 +406,6 @@ def profile():
                 return render_template('profile.html', feedback=feedback,recommended_job=recommended_job)
             else :
                 return render_template('profile.html',feedback=feedback,recommended_job=recommended_job, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
-
     else:
         userid = session['id']
         con = get_db_connection()
