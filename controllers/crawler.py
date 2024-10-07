@@ -15,7 +15,12 @@ class JobSpider(scrapy.Spider):
 
     # List of job titles to search for
     job_titles = [
-        "Software Engineer"
+        "Software Engineer", "Systems Administrator", "Network Engineer",
+        "Database Administrator", "IT Support Specialist", "DevOps Engineer",
+        "Security Analyst", "Web Developer", "Data Scientist", "Cloud Architect",
+        "Project Manager", "Business Analyst", "Quality Assurance Engineer",
+        "Mobile Developer", "Technical Support Engineer", "Product Manager",
+        "UI/UX Designer", "IT Manager", "Solutions Architect", "Full Stack Developer"
     ]
 
     start_urls = [
