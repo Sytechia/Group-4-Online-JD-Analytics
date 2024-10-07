@@ -87,8 +87,8 @@ def format_feedback(feedback):
 def suggest_job(cv_text):
     prompt = f"""
     You are an expert career advisor. 
-    Based on the following CV, please analyze and summarize the candidate's experience, skills, and qualifications. 
-    Then, suggest relevant 3 jobs that align well with their background and expertise.
+    Based on the following CV, using the candidate's experience, skills, and qualifications. 
+    Suggest relevant 3 jobs that align well with their background and expertise.
     CV: {cv_text}
     """
     

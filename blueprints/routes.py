@@ -341,14 +341,16 @@ def profile():
             feedback = format_feedback(feedback)
             cur.execute("UPDATE userdata SET feedback = ? WHERE id = ?", (feedback,userid,))
             con.commit()
+            cur.execute('SELECT recommended_job FROM userdata WHERE id = ?', (userid,))
+            recommended_job = cur.fetchone()['recommended_job']            
             con.close()
         
             # Fetch soft and hard skills from the database
             soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
             if  soft_skills_list == [] or hard_skills_list == []:
-                return render_template('profile.html' ,feedback=feedback)
+                return render_template('profile.html' ,feedback=feedback,recommended_job=recommended_job)
             else :
-                return render_template('profile.html', feedback=feedback,soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+                return render_template('profile.html', feedback=feedback,recommended_job=recommended_job,soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
         
         elif form_type == 'update_user_skills':
             # Example usage in your function:
@@ -375,14 +377,16 @@ def profile():
             cur.execute("UPDATE userdata SET nested_skills = ? WHERE id = ?", (stored_text,userid,))
             cur = con.cursor()
             feedback = cur.fetchone()['feedback'] 
+            cur.execute('SELECT recommended_job FROM userdata WHERE id = ?', (userid,))
+            recommended_job = cur.fetchone()['recommended_job'] 
             con.close()
         
             # Fetch soft and hard skills from the database
             soft_skills_list, hard_skills_list = check_metrics_for_plot(userid)
             if  soft_skills_list == [] or hard_skills_list == []:
-                return render_template('profile.html', feedback=feedback)
+                return render_template('profile.html', feedback=feedback,recommended_job=recommended_job)
             else :
-                return render_template('profile.html',feedback=feedback, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
+                return render_template('profile.html',feedback=feedback,recommended_job=recommended_job, soft_skills_list=soft_skills_list,hard_skills_list=hard_skills_list)
 
     else:
         userid = session['id']
