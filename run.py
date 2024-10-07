@@ -1,5 +1,4 @@
 # Main file that runs the application
-
 from blueprints import app
 import os
 import threading
@@ -26,7 +25,6 @@ def schedule_crawler():
         schedule.run_pending()
         time.sleep(1)
 
-if __name__ == "__main__":
 if __name__ == "__main__":
     app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
     crawler_thread = threading.Thread(target=schedule_crawler)

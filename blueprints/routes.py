@@ -188,15 +188,24 @@ def index():
                 return render_template("login.html")  
             if password != password2:
                 flash('Password do not match.', 'danger')
-                return render_template("login.html") 
-            
-            hashed_password = generate_password_hash(password)
+                return render_template("login.html")            
 
             # Demo Purpose
             is_admin = 0
 
             con = get_db_connection()  
             cur = con.cursor()
+
+            # Check if username already exists
+            cur.execute("SELECT * FROM userdata WHERE username = ?", (name,))
+            existing_user = cur.fetchone()
+
+            if existing_user:
+                flash('Username already exists.', 'danger')
+                return render_template("login.html")
+
+            hashed_password = generate_password_hash(password)
+
             cur.execute("INSERT into userdata (username, hashed_password,is_admin) values (?,?,?)",(name,hashed_password,is_admin)) 
    
             con.commit()
