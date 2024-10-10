@@ -370,7 +370,7 @@ def profile():
             ROOT_DIR = Path.cwd()
             metrics_file_path = ROOT_DIR / 'metrics.md'  # Path to the metrics.md file
 
-            # Call the function to extract keywords from the metrics.md file
+            # Call the function to extract keywords from metrics.md file
             resume_text = extract_text_from_pdf_matthew(file_path)
             resume_keywords = preprocess_text(resume_text)
             metrics_keywords = extract_keywords_from_metrics(metrics_file_path, resume_keywords, threshold=80)
