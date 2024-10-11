@@ -165,7 +165,7 @@
         color: #c74747;
     }
 
-    .job-info p{
+    .job-info p {
         margin: 5px 0;
         color: #c4c3ca;
     }
@@ -377,64 +377,58 @@
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Search form elements
-            // Search form elements
             const searchInput = document.getElementById('search-input');
             const suggestionBox = document.getElementById('suggestion-box');
             const searchForm = document.getElementById('search-form');
             const jobCardsContainer = document.getElementById('search-results');
             const searchTitle = document.getElementById('search-title');
 
-            // Function to fetch suggestions from the backend
-            function fetchSuggestions(query) {
+            function fetchSuggestions(query) { // fetch suggestions from backend
                 return fetch(`/search_suggestions?query=${encodeURIComponent(query)}`)
-                    .then(response => response.json())  // Parse the JSON response
-                    .then(data => data)  // Return the data (suggestions)
+                    .then(response => response.json())
+                    .then(data => data)
                     .catch(error => {
                         console.error('Error fetching suggestions:', error);
                         return [];
                     });
             }
 
-            // Event listener for typing in the search bar (suggestion box)
-            searchInput.addEventListener('input', function () {
+            searchInput.addEventListener('input', function () { // suggestion box event listener
                 const query = searchInput.value.trim();
 
-                if (query.length > 2) {  // Only fetch suggestions for input longer than 2 characters
+                if (query.length > 2) {
                     fetchSuggestions(query).then(suggestions => {
-                        suggestionBox.innerHTML = '';  // Clear previous suggestions
-                        suggestionBox.style.display = 'block';  // Show the suggestion box
+                        suggestionBox.innerHTML = '';
+                        suggestionBox.style.display = 'block'; 
 
                         if (suggestions.length > 0) {
                             suggestions.forEach(item => {
                                 const div = document.createElement('div');
                                 div.className = 'suggestion-item';
-                                div.textContent = item;  // Add the suggestion text
+                                div.textContent = item;
                                 div.onclick = function () {
-                                    searchInput.value = item;  // Set input value to clicked suggestion
-                                    suggestionBox.innerHTML = '';  // Clear suggestions
-                                    suggestionBox.style.display = 'none';  // Hide the suggestion box after selection
+                                    searchInput.value = item;
+                                    suggestionBox.innerHTML = '';
+                                    suggestionBox.style.display = 'none';
                                 };
-                                suggestionBox.appendChild(div);  // Append the suggestion to the suggestion box
+                                suggestionBox.appendChild(div);
                             });
                         } else {
                             suggestionBox.innerHTML = '<div class="suggestion-item">No results found</div>';
                         }
                     });
                 } else {
-                    suggestionBox.innerHTML = '';  // Clear suggestions for short input
-                    suggestionBox.style.display = 'none';  // Hide the suggestion box if input is too short
+                    suggestionBox.innerHTML = '';
+                    suggestionBox.style.display = 'none';
                 }
             });
 
-            // Optional: Hide the suggestion box if clicked outside
-            document.addEventListener('click', function (e) {
+            document.addEventListener('click', function (e) { // hide suggestion box if clicked outside
                 if (!suggestionBox.contains(e.target) && !searchInput.contains(e.target)) {
                     suggestionBox.style.display = 'none';
                 }
             });
 
-            // Function to add the click event listener to a job card for expanding/collapsing
             function makeCardExpandable(card) {
                 card.addEventListener('click', () => {
                     if (card.classList.contains('collapsed')) {
@@ -449,36 +443,31 @@
                 });
             }
 
-            // Apply event listener to all static job cards on page load
             document.querySelectorAll('.job-card').forEach(card => {
-                card.classList.add('collapsed');  // Set initial state as collapsed
+                card.classList.add('collapsed');  // initial state is collapsed
                 makeCardExpandable(card);
             });
 
-            // Handle the search form submission (dynamic job card creation)
             searchForm.addEventListener('submit', function (event) {
-                event.preventDefault();  // Prevent the form from submitting normally
+                event.preventDefault();  // Prevent form from submitting normally
 
                 const query = searchInput.value.trim();
 
                 if (query.length > 0) {
-                    // Show the h2 title and update it with the search query
                     searchTitle.style.display = 'block';
                     searchTitle.textContent = `Based on your search for "${query}":`;
 
-                    // Perform the AJAX request to get the search results
-                    fetch(`/search?query=${encodeURIComponent(query)}`)
+                    
+                    fetch(`/search?query=${encodeURIComponent(query)}`) // Perform AJAX request to get search results
                         .then(response => response.json())
                         .then(data => {
-                            // Clear the current job cards
+                            // Clear current job cards
                             jobCardsContainer.innerHTML = '';
 
                             if (data.length > 0) {
-                                // Show the job cards container
                                 jobCardsContainer.style.display = 'block';
 
-                                // Loop through the results and create new job cards
-                                data.forEach(job => {
+                                data.forEach(job => { // create new job cards
                                     const jobCardHTML = `
                 <div class="job-card collapsed" style="height: 200px; overflow: hidden; width: 100%;">
                     <div class="job-info">
@@ -494,16 +483,11 @@
                         </a>
                     </div>
                 </div>`;
-
-                                    // Insert the new job card into the DOM
                                     jobCardsContainer.insertAdjacentHTML('beforeend', jobCardHTML);
-
-                                    // Apply the click event listener to the newly created job card
-                                    const newlyCreatedCard = jobCardsContainer.lastElementChild;
+                                    const newlyCreatedCard = jobCardsContainer.lastElementChild; // Apply click event listener to collapse / expand
                                     makeCardExpandable(newlyCreatedCard);
                                 });
-                            } else {
-                                // Show a message if no jobs were found
+                            } else { // if no jobs found
                                 jobCardsContainer.style.display = 'block';
                                 jobCardsContainer.innerHTML = '<p>No jobs found for your search.</p>';
                             }

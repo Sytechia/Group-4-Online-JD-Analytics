@@ -1,7 +1,7 @@
 import scrapy
 import sqlite3
 import schedule, time
-from urllib.parse import quote_plus  # To encode job titles for URLs
+from urllib.parse import quote_plus
 from scrapy.crawler import CrawlerProcess
 from scrapy.spidermiddlewares.httperror import HttpError
 from controllers.parse_data import parse_job, update_existing_job
@@ -35,6 +35,7 @@ class JobSpider(scrapy.Spider):
         self.conn = get_db_connection()  # Establish a connection to the database
         self.cursor = self.conn.cursor()  # Initialize the cursor
 
+
     def start_requests(self):
         for url in self.start_urls:
             print(f"Scrapping: {url}")
@@ -64,18 +65,3 @@ class JobSpider(scrapy.Spider):
     @classmethod
     def get_job_titles(cls):
         return cls.job_titles
-
-# if __name__ == "__main__":
-#     process = CrawlerProcess()
-#     process.crawl(JobSpider)
-#
-#     @defer.inlineCallbacks
-#     def crawl():
-#         yield process.crawl(JobSpider)
-#
-#     # def run_crawler():
-#     #     task.LoopingCall(crawl).start(5.0)
-#
-#     # process.start(run_crawler())
-#
-#     process.start()

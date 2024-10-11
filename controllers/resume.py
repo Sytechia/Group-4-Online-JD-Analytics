@@ -93,14 +93,13 @@ def suggest_job(cv_text):
     """
     
     response = openai.chat.completions.create(
-        model="gpt-4o-mini",  # Ensure this is a valid model name
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=500  # Adjust as needed
+        max_tokens=500
     )
-    # Extract the job suggestions from the response
     job_suggestions = response.choices[0].message.content.strip()
     
     return (f'{job_suggestions}')
@@ -113,126 +112,82 @@ def ai_suggest_job(cv_text):
 def extract_text_from_pdf_matthew(pdf_file_path):
     text = ""
     try:
-        # Open the PDF file using PdfReader
         reader = PdfReader(pdf_file_path)
-        
-        # Iterate over each page and extract text
         for page in reader.pages:
             extracted_text = page.extract_text()
             
             if extracted_text:
                 text += extracted_text
 
-        # Step 1: Clean up CID-related errors (patterns like (cid:###)), replacing with space
-        text = re.sub(r'\(cid:\d{3,}\)', ' ', text)
-
-        # Step 2: Insert spaces between lowercase and uppercase letters (for concatenated words)
-        text = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text)
-
-        # Step 3: Normalize multiple spaces and remove newlines
-        text = re.sub(r'\s+', ' ', text).strip()
-
-        # Step 4: Convert text to lowercase
+        text = re.sub(r'\(cid:\d{3,}\)', ' ', text) # Clean up CID-related errors
+        text = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text) # Insert spaces between lower and upper case letters
+        text = re.sub(r'\s+', ' ', text).strip() #Normalize multiple spaces, remove newlines
         text = text.lower()
+        
     except Exception as e:
         print(f"Error extracting text: {e}")
 
     return text
 
-# Step 2: Preprocess the extracted resume text
 def preprocess_text(text):
-    # Remove special characters and numbers
-    text = re.sub(r'[^a-zA-Z\s]', '', text)
-
-    # Tokenize text into words
-    words = word_tokenize(text)
-
-    # Remove stopwords (e.g. "and", "the", "is")
-    stop_words = set(stopwords.words('english'))
+    text = re.sub(r'[^a-zA-Z\s]', '', text) # Remove special characters and numbers
+    words = word_tokenize(text) # Tokenize text into words using nltk
+    stop_words = set(stopwords.words('english')) # Remove stopwords using nltk
     filtered_words = [word for word in words if word not in stop_words]
-
+    
     return filtered_words
 
-# Step 3: Extract skills from metrics.md file by cleaning up the HTML tags
 def extract_keywords_from_metrics(file_path, resume_keywords, threshold=80):
     with open(file_path, 'r') as file:
         metrics_text = file.read()
 
-    # Using BeautifulSoup to parse the HTML-like content in the file
-    soup = BeautifulSoup(metrics_text, 'html.parser')
+    soup = BeautifulSoup(metrics_text, 'html.parser') # Parse HTML-like content
+    skills_list = [li.get_text(strip=True).lower() for li in soup.find_all('li')] # find <li> items, convert to lowercase
 
-    # Find all list items <li> which contain the skills and convert them to lowercase
-    skills_list = [li.get_text(strip=True).lower() for li in soup.find_all('li')]
-
-
-    # Use fuzzy matching to include similar keywords
     similar_keywords = []
     
     for skill in skills_list:
         # Use fuzzywuzzy to find keywords in the resume that match the skill with a given threshold
         matches = process.extractBests(skill, resume_keywords, scorer=fuzz.ratio, score_cutoff=threshold)
-        # If there are matches, append the matched keyword to the similar_keywords list
         for match in matches:
             similar_keywords.append(match[0])  
 
-    # Combine skills_list and similar_keywords into one list
     combined_keywords = skills_list + similar_keywords
-
-    # Return the combined list of skills and similar keywords
     return combined_keywords
 
-# Step 4: Compare resume keywords with metrics.md keywords
 def compare_resume_to_metrics(resume_keywords, combined_keywords):
-
-
-    # Step 4: Compare resume keywords with combined keywords
     matching_keywords = [word for word in resume_keywords if word in combined_keywords]
-
     return matching_keywords
 
-# Function to insert resume text into the nested_skills column where userid = 1
 def insert_resume_text(userid, resume_text):
-    con = get_db_connection()  # Establish connection using helper function
+    con = get_db_connection()  
     cur = con.cursor()
 
     try:
-        # Check if the user with userid 1 exists
         cur.execute("SELECT 1 FROM userdata WHERE id = ?", (userid,))
         user_exists = cur.fetchone()
 
         if user_exists:
-            # Insert the resume text into the nested_skills column where userid = 1
             cur.execute("UPDATE userdata SET nested_skills = ? WHERE id = ?", (resume_text, userid))
             con.commit()
             calculate_score(userid)
         else:
-            # If user doesn't exist, return an error for frontend to handle
-            print("User ID not found. Trigger JavaScript alert for account creation.")
             return {"status": "error", "message": "User ID not found. Please create an account."}
 
     except sqlite3.Error as e:
-        print(f"An error occurred while interacting with the database: {e}")
         return {"status": "error", "message": "Database error."}
     
     finally:
-        con.close()  # Close the connection
+        con.close()
         
 def insert_recommended_job(cv_text, userid):
-    # Get job suggestions using the AI function
     job_feedback = ai_suggest_job(cv_text)
-    
-    # Connect to the database
+
     con = get_db_connection()
     cur = con.cursor()
-
-    # Insert job suggestions into the 'recommended_job' column for the current user
     cur.execute("UPDATE userdata SET recommended_job = ? WHERE id = ?", (job_feedback, userid))
-    
-    # Commit the changes and close the connection
     con.commit()
     con.close()
-
-    # Optionally return a confirmation or success message
-    return "Job recommendations saved successfully."
+    return job_feedback
 
 #<-----------------Matthew Codes End ------------------------>
