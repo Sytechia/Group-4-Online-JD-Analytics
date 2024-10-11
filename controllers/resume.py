@@ -41,9 +41,7 @@ def get_cv_feedback(cv_text,foi):
     You are an expert in recruitment and resume evaluation. Please review the following CV and provide remarks regarding:
     1. Formatting
     2. Grammar and Language
-    3. Key Skills Highlighted
-    4. Alignment with potential job roles
-    5. Areas of improvement
+    3. Areas of improvement
     While considering my interest in the role of an {foi}
     CV: {cv_text}
     """
