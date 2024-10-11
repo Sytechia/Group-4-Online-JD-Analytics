@@ -18,7 +18,6 @@ from functools import wraps
 
 from controllers.resume import  compare_resume_to_metrics, extract_keywords_from_metrics, preprocess_text, insert_resume_text, extract_text_from_pdf_matthew
 from pathlib import Path
-import bleach
 
 
 home_blueprint = Blueprint('home', __name__)

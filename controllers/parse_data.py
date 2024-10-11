@@ -8,12 +8,13 @@ import requests
 import time
 from secret_key import openai_api_key
 
+
 # Function to parse job data from the response
 def parse_job(response, cursor, conn):
+
     # Parse the HTML content from the response using BeautifulSoup
     soup = BeautifulSoup(response.body, 'html.parser')
     jobs = soup.find_all("div", class_="base-card")  # Find all job cards on the page
-    print(f"Found {len(jobs)} jobs")  # Print the number of jobs found
 
     # Loop through each job listing found
     for job in jobs:
@@ -87,21 +88,21 @@ def parse_job(response, cursor, conn):
             # Fetch job description and position level from the job details page
             get_job_description_soup, job_position_level_soup = fetch_job_details(job_item['job_detail_url'])
 
-            job_item['job_description'] = get_job_description(get_job_description_soup) # Get the job description
+            job_item['job_description'] = get_job_description(get_job_description_soup)  # Get the job description
 
             if job_item['job_description'] is None:
                 continue
 
-            job_item['job_position_level'] = get_job_position_level(job_position_level_soup, job_item['job_description'])  # Get the seniority level
-
+            job_item['job_position_level'] = get_job_position_level(job_position_level_soup, job_item[
+                'job_description'])  # Get the seniority level
 
             # Insert the job data into the database
             insert_job_into_db(cursor, conn, job_item)
             print(f"Inserted job - ID: {job_item['job_id']}, Name: {job_item['job_title']}")
 
-
-
             yield job_item  # Yield the job item for further use
+
+
 
 
 # Function to insert job data into the SQLite database
@@ -150,13 +151,12 @@ def update_existing_job(cursor, conn, job_item):
     if not updates:
         return
 
-    # Update the job data if necessary
+    # Update the job data
     if updates:
         update_values.append(job_item['job_id'])
         update_query = f"UPDATE jobdesc SET {', '.join(updates)} WHERE job_id = ?"
         cursor.execute(update_query, update_values)
         conn.commit()
-
 
 # Function to clean and retrieve the job description HTML
 def get_job_description(job_description_soup):
@@ -241,7 +241,6 @@ def get_job_position_level(job_position_level_soup, job_description):
 
 
 
-"Ray make this function as a portion of your code as well"
 def make_request_with_retries(url, backoff_factor=1):
     retries = 0
 
@@ -258,8 +257,6 @@ def make_request_with_retries(url, backoff_factor=1):
             retries += 1
         else:
             return response
-""""""""
-
 
 # Fetch job details (description and position level) from the job detail URL
 def fetch_job_details(job_detail_url):
