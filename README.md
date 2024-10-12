@@ -87,7 +87,7 @@ Main Folder
 1. Clone the Github Repository
 2. Extract the content.
 3. Locate the Main Folder.
-4. run `python pip install -r requiremnt.txt`
+4. run `python -m pip install -r requirements.txt`
 5. Replace text with OpenAI API key in `secret_key.py`
 6. run `run.py`
 7. Enjoy your experience using CareerBridge by using your favourite browser and going to `127.0.0.1:5000`
